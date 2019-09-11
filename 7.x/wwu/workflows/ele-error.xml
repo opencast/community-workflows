@@ -1,0 +1,47 @@
+<!-- This is the the custom error handler -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>ele-error</id>
+  <description>Cleanup and notify after a processing failure</description>
+  <operations>
+
+    <!-- Archive the current state of the media package -->
+
+    <operation
+      id="snapshot"
+      fail-on-error="false"
+      description="Preserve the current recording state">
+      <configurations>
+        <configuration key="source-flavors">*/source,dublincore/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Notify the admins via mattermost  -->
+
+    <operation
+      id="mattermost-notify"
+      fail-on-error="false"
+      exception-handler-workflow="ele-error"
+      description="Notify mattermost about error">
+      <configurations>
+        <configuration key="url">REMOVED</configuration>
+        <configuration key="message">Fehler in der Verarbeitung der Aufnahme %T im Workflow %t</configuration>
+        <configuration key="method">post</configuration>
+        <configuration key="max-retry">3</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup the temporary files from the working file repository -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

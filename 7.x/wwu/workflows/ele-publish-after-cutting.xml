@@ -1,0 +1,110 @@
+<!-- This is the only workflow that can be triggerd from the editor and contains all operation until publishing -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-publish-after-cutting</id>
+  <title>Schneiden und veröffentlichen</title>
+  <tags>
+    <tag>editor</tag>
+  </tags>
+
+  <operations>
+
+    <!-- Resolve the comment for cutting -->
+
+    <operation
+      id="comment"
+      description="Resolve the cutting flag">
+      <configurations>
+        <configuration key="description">Recording has not been cut yet.</configuration>
+        <configuration key="reason">EVENTS.EVENTS.DETAILS.COMMENTS.REASONS.CUTTING</configuration>
+        <configuration key="action">resolve</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare the work media                                            -->
+
+    <operation
+      id="include"
+      description="Prepare and mux">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-av</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare the recording for publication -->
+
+    <operation
+      id="include"
+      description="Publish the recording">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to publication channels                                   -->
+
+    <operation
+      id="include"
+      description="Include publish workflow">
+      <configurations>
+        <configuration key="workflow-id">ele-publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Configure the workflow variables to check if a control email is wanted -->
+
+    <operation
+      id="configure-by-dcterm"
+      fail-on-error="true"
+      description="Configure control by dcterm">
+      <configurations>
+        <configuration key="dccatalog">extended</configuration>
+        <configuration key="dcterm">checkRecordings</configuration>
+        <configuration key="match-value">true</configuration>
+        <configuration key="control">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include workflow for sending the control email -->
+
+    <operation
+      id="include"
+      if="${control}"
+      description="Include control notify workflow">
+      <configurations>
+        <configuration key="workflow-id">ele-control-notify</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

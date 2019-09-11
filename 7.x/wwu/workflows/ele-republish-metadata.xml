@@ -1,0 +1,70 @@
+<!-- This workflow republishes the metadata and security settings -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-republish-metadata</id>
+  <title>Metadaten und Security updaten</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+        <!--
+          #workflow-configuration legend { padding-top:20px; padding-bottom:5px }
+          #workflow-configuration li { padding:2px 20px;}
+          #workflow-configuration input[type=checkbox] { padding: 0px; }
+          #workflow-configuration label { display: inline-block; padding: 0px 5px; }
+          #workflow-configuration input:disabled+label{ opacity: 0.5; }
+        -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          Dieser Wokflow updated die Metadaten und Zugriffsrichtlinien auf dem Opencast Medienmodul.
+        </fieldset>
+      </div>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Analyze and set control variables -->
+
+    <operation
+      id="analyze-tracks"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Analyze tracks in media package and set control variables">
+      <configurations>
+        <configuration key="source-flavor">*/delivery</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to engage player -->
+
+    <operation
+      id="publish-engage"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenter_delivery_video} OR ${presentation_delivery_video} OR ${presentation-1_delivery_video} OR ${presenterfull_delivery_video}"
+      exception-handler-workflow="ele-error"
+      description="Update recording in Opencast Media Module">
+      <configurations>
+        <configuration key="download-source-flavors">dublincore/*,security/*</configuration>
+        <configuration key="strategy">merge</configuration>
+        <configuration key="check-availability">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

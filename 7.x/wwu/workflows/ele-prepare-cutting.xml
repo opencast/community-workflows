@@ -1,0 +1,125 @@
+<!-- This workflow contains the prepare a recording for editing -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-prepare-cutting</id>
+  <title>Workflow zum vorbereiten einer Aufnahme für den Schnitt</title>
+
+  <operations>
+
+    <!-- Include the ele-prepare-av workflow -->
+
+    <operation
+      id="include"
+      description="Prepare and mux">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-av</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the ele-previews workflow -->
+
+    <operation
+      id="include"
+      description="Process and publish">
+      <configurations>
+        <configuration key="workflow-id">ele-previews</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Extract the audio track -->
+
+    <operation
+      id="compose"
+      fail-on-error="false"
+      description="Extracting audio">
+      <configurations>
+        <configuration key="source-flavor">*/preview</configuration>
+        <configuration key="target-flavor">*/audio</configuration>
+        <configuration key="encoding-profile">audio.wav</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create the audio waveform -->
+
+    <operation
+      id="waveform"
+      fail-on-error="false"
+      description="Generating waveform">
+      <configurations>
+        <configuration key="source-flavor">*/audio</configuration>
+        <configuration key="target-flavor">*/waveform</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the waveform for internal publishing -->
+
+    <operation
+      id="tag"
+      description="Preparing waveform for publishing">
+      <configurations>
+        <configuration key="source-flavors">*/waveform</configuration>
+        <configuration key="target-tags">+preview</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Run silence detection -->
+
+    <operation
+      id="silence"
+      fail-on-error="false"
+      description="Detecting silence">
+      <configurations>
+        <configuration key="source-flavors">*/audio</configuration>
+        <configuration key="smil-flavor-subtype">silence</configuration>
+        <configuration key="reference-tracks-flavor">*/work</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the silence detection for internal publishing -->
+
+    <operation
+      id="tag"
+      description="Preparing silence detection for preview">
+      <configurations>
+        <configuration key="source-flavors">*/silence</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish previews to the editor -->
+
+    <operation
+      id="publish-configure"
+      exception-handler-workflow="ele-error"
+      description="Publish to preview publication channel">
+      <configurations>
+        <configuration key="source-tags">preview</configuration>
+        <configuration key="channel-id">internal</configuration>
+        <configuration key="url-pattern">http://localhost:8080/admin-ng/index.html#/events/events/${event_id}/tools/playback</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive with editor previews generated -->
+
+    <operation
+      id="snapshot"
+      description="Archive preview information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Mark the recording for cutting -->
+
+    <operation
+      id="comment"
+      description="Mark the recording for cutting">
+      <configurations>
+        <configuration key="description">Recording has not been cut yet.</configuration>
+        <configuration key="reason">EVENTS.EVENTS.DETAILS.COMMENTS.REASONS.CUTTING</configuration>
+        <configuration key="action">create</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

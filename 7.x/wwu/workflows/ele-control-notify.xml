@@ -1,0 +1,25 @@
+<!-- This workflow contains the operations needed to send an email to the presenter if wanted -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-control-notify</id>
+  <title>Workflow zum Kontrollemail schicken</title>
+
+  <operations>
+
+    <!-- In this operation the email address is read from the extended metadata catalog -->
+
+    <operation
+      id="send-email"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Sends email">
+      <configurations>
+        <configuration key="to">${catalogs['extended']['contactEmail']}</configuration>
+        <configuration key="bcc">electures@uni-muenster.de</configuration>
+        <configuration key="subject">[${catalogs['extended']['case']}] Aufnahme ${catalogs['episode']['title']} ist zur Kontrolle einsehbar</configuration>
+        <configuration key="body-template-file">controlNotify</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

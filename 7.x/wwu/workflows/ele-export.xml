@@ -1,0 +1,86 @@
+<!-- This workflow creates the export files -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-export</id>
+  <title>Workflow zum publishen</title>
+
+  <operations>
+
+    <!-- Generate PiP for presenter and presentation with presentation in big -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${ex-pip-presentation}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Composite for export">
+      <configurations>
+        <configuration key="source-flavor-upper">presenter/trimmed</configuration>
+        <configuration key="source-flavor-lower">presentation/trimmed</configuration>
+        <configuration key="encoding-profile">composite-ele.http</configuration>
+        <configuration key="target-tags">archive</configuration>
+        <configuration key="target-flavor">composite/delivery</configuration>
+        <configuration key="output-resolution">1920x1080</configuration>
+        <configuration key="layout">bottomright</configuration>
+        <configuration key="layout-bottomright">
+          {"horizontalCoverage":1.0,"anchorOffset":{"referring":{"left":1.0,"top":1.0},"offset":{"y":-10,"x":-10},"reference":{"left":1.0,"top":1.0}}};
+          {"horizontalCoverage":0.25,"anchorOffset":{"referring":{"left":1.0,"top":1.0},"offset":{"y":-10,"x":-10},"reference":{"left":1.0,"top":1.0}}}
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate PiP for presenter and presentation with presenter in big -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${ex-pip-presenter}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Composite for export">
+      <configurations>
+        <configuration key="source-flavor-upper">presentation/trimmed</configuration>
+        <configuration key="source-flavor-lower">presenter/trimmed</configuration>
+        <configuration key="encoding-profile">composite-ele.http</configuration>
+        <configuration key="target-tags">archive</configuration>
+        <configuration key="target-flavor">composite/delivery</configuration>
+        <configuration key="output-resolution">1920x1080</configuration>
+        <configuration key="layout">bottomright</configuration>
+        <configuration key="layout-bottomright">
+          {"horizontalCoverage":1.0,"anchorOffset":{"referring":{"left":1.0,"top":1.0},"offset":{"y":-10,"x":-10},"reference":{"left":1.0,"top":1.0}}};
+          {"horizontalCoverage":0.25,"anchorOffset":{"referring":{"left":1.0,"top":1.0},"offset":{"y":-10,"x":-10},"reference":{"left":1.0,"top":1.0}}}
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate side by side video for presenter and presentation -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${ex-dual}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Composite for export">
+      <configurations>
+        <configuration key="source-flavor-upper">presentation/trimmed</configuration>
+        <configuration key="source-flavor-lower">presenter/trimmed</configuration>
+        <configuration key="encoding-profile">composite-ele.http</configuration>
+        <configuration key="target-tags">archive</configuration>
+        <configuration key="target-flavor">composite/delivery</configuration>
+        <configuration key="output-resolution">1920x576</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

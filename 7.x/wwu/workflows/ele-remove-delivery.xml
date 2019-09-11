@@ -1,0 +1,50 @@
+<!-- This workflow is the wrapper so that the removal of delivery files can also be triggerd from the Admin UI  -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-remove-delivery</id>
+  <title>Retracten und entfernen der Delivery Versionen</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+  <description>Retracten und entfernen der delivery Versionen aus dem Mediapackage</description>
+
+  <configuration_panel>
+    <![CDATA[
+      Retracten und entfernen der delivery Versionen aus dem Mediapackage
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Retract everything -->
+
+    <operation
+      id="include"
+      description="Retract everything">
+      <configurations>
+        <configuration key="workflow-id">ele-retract-files</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include removal workflow -->
+
+    <operation
+      id="include"
+      description="Include remove delivery">
+      <configurations>
+        <configuration key="workflow-id">ele-remove-delivery-files</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

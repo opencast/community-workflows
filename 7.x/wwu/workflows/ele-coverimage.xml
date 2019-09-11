@@ -1,0 +1,82 @@
+<!-- This workflow contains the operations to create the coverimages -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-coverimage</id>
+  <title>Workflow zum erstellen der coverimages</title>
+
+  <operations>
+
+    <!-- Create a cover image with electures template for presentation -->
+
+    <operation
+      id="cover-image"
+      if="${presentation}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create a cover image for presentation">
+      <configurations>
+        <configuration key="stylesheet">file://${karaf.etc}/branding/electures-1080p.xsl</configuration>
+        <configuration key="width">1920</configuration>
+        <configuration key="height">1080</configuration>
+        <configuration key="posterimage">file://${karaf.etc}/branding/coverimage.svg</configuration>
+        <configuration key="target-flavor">presentation/player+preview</configuration>
+        <configuration key="target-tags">archive, engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create a cover image with electures template for presentation-1 -->
+
+    <operation
+      id="cover-image"
+      if="(NOT(${presentation}) AND ${presentation-1})"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create a cover image for presentation-1">
+      <configurations>
+        <configuration key="stylesheet">file://${karaf.etc}/branding/electures-1080p.xsl</configuration>
+        <configuration key="width">1920</configuration>
+        <configuration key="height">1080</configuration>
+        <configuration key="posterimage">file://${karaf.etc}/branding/coverimage.svg</configuration>
+        <configuration key="target-flavor">presentation-1/player+preview</configuration>
+        <configuration key="target-tags">archive, engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create a cover image with electures template for presenter -->
+
+    <operation
+      id="cover-image"
+      if="(NOT(${presentation}) AND NOT(${presentation-1}) AND ${presenter})"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create a cover image for presenter">
+      <configurations>
+        <configuration key="stylesheet">file://${karaf.etc}/branding/electures-720p.xsl</configuration>
+        <configuration key="width">1280</configuration>
+        <configuration key="height">720</configuration>
+        <configuration key="posterimage">file://${karaf.etc}/branding/coverimage.svg</configuration>
+        <configuration key="target-flavor">presenter/player+preview</configuration>
+        <configuration key="target-tags">archive, engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create a cover image with electures template for presenterfull -->
+
+    <operation
+      id="cover-image"
+      if="(${presenterfull} AND NOT(${presenter}) AND NOT(${presentation}) AND NOT(${presentation-1}))"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create a cover image for presenterfull">
+      <configurations>
+        <configuration key="stylesheet">file://${karaf.etc}/branding/electures-4K.xsl</configuration>
+        <configuration key="width">3840</configuration>
+        <configuration key="height">2160</configuration>
+        <configuration key="posterimage">file://${karaf.etc}/branding/coverimage.svg</configuration>
+        <configuration key="target-flavor">presenterfull/player+preview</configuration>
+        <configuration key="target-tags">archive, engage-download</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

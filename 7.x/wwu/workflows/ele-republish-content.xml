@@ -1,0 +1,42 @@
+<!-- This workflow republishes already encoded delivery tracks -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-republish-content</id>
+  <title>Bestehende Delivery Dateien veröffentlichen.</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+
+  <operations>
+
+    <!-- Publish to publication channels                                   -->
+
+    <operation
+      id="include"
+      description="Include the publish workflow">
+      <configurations>
+        <configuration key="workflow-id">ele-publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the current state of the mediapackage -->
+
+    <operation
+      id="snapshot"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Archiving state of republished recording">
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

@@ -1,0 +1,72 @@
+<!-- This workflow provides a wrapper so that a retraction can be triggerd from the admin UI -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-retract</id>
+  <title>Retract</title>
+  <tags>
+    <tag>archive</tag>
+    <tag>delete</tag>
+  </tags>
+  <description>Aufnahme offline nehmen</description>
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+      <!--
+        #workflow-configuration legend { padding-top:20px; padding-bottom:5px; }
+        #workflow-configuration li { padding-top:5px; padding-bottom:5px; line-height:14px }
+      -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Aufnahme zurückziehen aus:</legend>
+          <ul>
+            <li>
+              <input id="retractFromEngage" type="checkbox" checked="checked" class="configField" value="true" />
+              <label for="retractFromEngage">Opencast Medien Modul</label>
+            </li>
+            <li>
+              <input id="retractPreview" type="checkbox" class="configField" value="true" />
+              <label for="retractPreview">Preview and Editing Media</label>
+            </li>
+            <li>
+              <input id="retractApi" type="checkbox" checked="checked" class="configField" value="true" />
+              <label for="retractApi">Api</label>
+            </li>
+            <li>
+              <input id="retractAnnotation" type="checkbox" checked="checked" class="configField" value="true" />
+              <label for="retractAnnotation">Annotation Tool</label>
+            </li>
+            <li>
+              <input id="retractOaipmh" type="checkbox" checked="checked" class="configField" value="true" />
+              <label for="retractOaipmh">OAI-PMH</label>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Include workflow that performs the retractions -->
+
+    <operation
+      id="include">
+      <configurations>
+        <configuration key="workflow-id">ele-retract-files</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

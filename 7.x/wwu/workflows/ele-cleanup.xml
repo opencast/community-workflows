@@ -1,0 +1,22 @@
+<!-- This is the cleanup workflow -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-cleanup</id>
+  <description>Räume den Workspace auf</description>
+
+  <operations>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="cleanup"
+      fail-on-error="false"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="preserve-flavors">security/*</configuration>
+        <configuration key="delete-external">true</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

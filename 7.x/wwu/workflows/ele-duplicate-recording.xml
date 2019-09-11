@@ -1,0 +1,73 @@
+<!-- This workflows creates N copies of recordings -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>ele-duplicate-recording</id>
+  <title>Aufnahme kopieren</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+  <description/>
+  <configuration_panel>
+    <![CDATA[
+      <div id="workflow-configuration">
+        <fieldset>
+          <input
+            id="numberOfEvents"
+            name="numberOfEvents"
+            type="number"
+            class="configField"
+            onkeypress="return event.charCode > 47"
+            oninput="checkValueInBounds()"
+            min="1"
+            value="1"
+            max="5"
+            />
+          <label for="numberOfEvents">Anzahl Kopien</label>
+        </fieldset>
+      </div>
+
+      <script type="text/javascript">
+        function checkValueInBounds() {
+          var value = $('#numberOfEvents').val();
+          var max = $('#numberOfEvents').attr('max');
+          var min = $('#numberOfEvents').attr('min');
+          if (parseInt(value) < parseInt(min)) $('#numberOfEvents').val(min);
+          if (parseInt(value) > parseInt(max)) $('#numberOfEvents').val(max);
+        }
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Create the new events -->
+
+    <operation
+      id="duplicate-event"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Duplicate Event">
+      <configurations>
+        <configuration key="source-flavors">*/source</configuration>
+        <configuration key="number-of-events">${numberOfEvents}</configuration>
+        <configuration key="max-number-of-events">5</configuration>
+        <configuration key="target-tags">+copied</configuration>
+        <configuration key="property-namespaces">org.opencastproject.assetmanager.security, org.opencastproject.workflow.configuration</configuration>
+        <configuration key="copy-number-prefix">Kopie</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup the working file repository -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

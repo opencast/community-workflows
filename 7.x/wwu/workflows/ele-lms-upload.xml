@@ -1,0 +1,252 @@
+<!-- This is the upload workflow which is triggerd from Moodle -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-lms-upload</id>
+  <title>Hochladen vom LMS</title>
+  <tags>
+    <tag>upload</tag>
+  </tags>
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+      <!--
+        #workflow-configuration legend { padding-top:20px; padding-bottom:5px }
+        #workflow-configuration li { padding:2px 20px;}
+        #workflow-configuration input[type=checkbox] { padding: 0px; }
+        #workflow-configuration label { display: inline-block; padding: 0px 5px; }
+        #workflow-configuration input:disabled+label{ opacity: 0.5; }
+      -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          Dieser Workflow veröffentlicht das hochgeladene Video zum LMS und zum Annotationstool. Das zu veröffentlichende Video muss beim hochladen als Video des Vortragenden (presenter/source) ausgewählt sein.
+        </fieldset>
+      </div>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Make sure all elements are downloaded from external sources and   -->
+    <!-- inside of Opencast                                                -->
+
+    <operation
+      id="ingest-download"
+      exception-handler-workflow="ele-error"
+      description="Ingesting external elements">
+      <configurations>
+        <configuration key="delete-external">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Inspect the media -->
+
+    <operation
+      id="inspect"
+      exception-handler-workflow="ele-error"
+      description="Inspecting audio and video streams">
+      <configurations>
+        <configuration key="overwrite">false</configuration>
+        <configuration key="accept-no-media">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Apply access control lists and metadata from series to the mediapackage -->
+
+    <operation
+      id="series"
+      exception-handler-workflow="ele-error"
+      description="Applying access control entries">
+      <configurations>
+        <configuration key="attach">*</configuration>
+        <configuration key="apply-acl">true</configuration>
+        <configuration key="copy-metadata">creator, license, language</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the incoming source material for archival -->
+
+    <operation
+      id="tag"
+      description="Tagging source material for archival">
+      <configurations>
+        <configuration key="source-flavors">*/*</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the incoming metadata catalogs for publishing -->
+
+    <operation
+      id="tag"
+      description="Tagging metadata catalogs for publication">
+      <configurations>
+        <configuration key="source-flavors">dublincore/*,security/*</configuration>
+        <configuration key="target-tags">+engage-download,+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare work versions of the source material for further processing -->
+
+    <operation
+      id="prepare-av"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Preparing presenter (camera) audio and video work versions">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="audio-muxing-source-flavors">*/?,*/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare work versions of the source material for further processing -->
+
+    <operation
+      id="compose"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create single-stream video preview"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavors">*/work</configuration>
+        <configuration key="target-flavor">*/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="encoding-profile">ele-preview.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish previews -->
+
+    <operation
+      id="publish-configure"
+      exception-handler-workflow="ele-error"
+      description="Publish to preview publication channel">
+      <configurations>
+        <configuration key="source-tags">preview</configuration>
+        <configuration key="channel-id">internal</configuration>
+        <configuration key="url-pattern">http://localhost:8080/admin-ng/index.html#/events/events/${event_id}/tools/playback</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode to engage search result thumbnails -->
+
+    <operation
+      id="image"
+      exception-handler-workflow="ele-error"
+      description="Creating search result thumbnails">
+      <configurations>
+        <configuration key="source-flavor">*/work</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">*/search+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profile">search-cover.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode to engage player preview images -->
+
+    <operation
+      id="image"
+      exception-handler-workflow="ele-error"
+      description="Creating player preview image">
+      <configurations>
+        <configuration key="source-flavor">*/work</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">*/player+preview</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="encoding-profile">ele-player-preview.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode to Engage player format -->
+
+    <operation
+      id="multiencode"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Encode presenter to MP4 download">
+      <configurations>
+        <configuration key="source-flavors">presenter/work</configuration>
+        <configuration key="target-flavors">presenter/delivery</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profiles">lms-low.http,lms-medium.http,lms-high.http</configuration>
+        <configuration key="tag-with-profile">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include workflow to correct the tagging -->
+
+    <operation
+      id="include"
+      description="Include encode">
+      <configurations>
+        <configuration key="workflow-id">ele-tag-quality</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create timeline previews -->
+
+    <operation
+      id="timelinepreviews"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create the timeline preview for presenter">
+      <configurations>
+        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="target-flavor">presenter/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="image-count">100</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include publish workflow                                   -->
+
+    <operation
+      id="include"
+      description="Include publish">
+      <configurations>
+        <configuration key="workflow-id">ele-publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

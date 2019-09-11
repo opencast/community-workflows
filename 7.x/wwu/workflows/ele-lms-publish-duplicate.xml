@@ -1,0 +1,75 @@
+<!-- This is the workflow that is triggerd from the duplicate upload workflow -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-lms-publish-duplicate</id>
+  <title>Publish a duplicate of an LMS upload</title>
+
+  <operations>
+
+    <!-- Apply series -->
+
+    <operation
+      id="series"
+      exception-handler-workflow="ele-error"
+      description="Apply series metadata and acl">
+      <configurations>
+        <configuration key="series">${seriesID}</configuration>
+        <configuration key="attach">*/*</configuration>
+        <configuration key="apply-acl">true</configuration>
+        <configuration key="copy-metadata">isPartOf</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag metadata for publication -->
+
+    <operation
+      id="tag"
+      description="Tagging metadata catalogs for publication">
+      <configurations>
+        <configuration key="source-flavors">dublincore/*,security/*</configuration>
+        <configuration key="target-tags">+engage-download,+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive -->
+
+    <operation
+      id="snapshot"
+      description="Archive updated duplicate">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to publication channels                                   -->
+
+    <operation
+      id="include"
+      description="Include the publish workflow">
+      <configurations>
+        <configuration key="workflow-id">ele-publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive after publish -->
+
+    <operation
+      id="snapshot"
+      description="Archive publish information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

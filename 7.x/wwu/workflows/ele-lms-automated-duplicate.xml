@@ -1,0 +1,58 @@
+<!-- This is the workflow that is triggerd by Moodle when a media package needs to be duplicated -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>ele-lms-automated-duplicate</id>
+  <title>LMS Upload aus dem LMS duplizieren</title>
+  <tags>
+    <tag>api</tag>
+  </tags>
+
+  <operations>
+
+    <!-- Create the new events -->
+
+    <operation
+      id="duplicate-event"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Duplicate Event">
+      <configurations>
+        <configuration key="source-flavors">*/source,*/delivery,*/search+preview,dublincore/*,*/player+preview,*/feed+preview,*/timeline+preview,smil/*,security/xacml+series</configuration>
+        <configuration key="number-of-events">1</configuration>
+        <configuration key="target-tags">+copied</configuration>
+        <configuration key="property-namespaces">org.opencastproject.assetmanager.security, org.opencastproject.workflow.configuration</configuration>
+        <configuration key="copy-number-prefix">Kopie</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Start new workflow on the copy -->
+
+    <operation
+      id="start-workflow"
+      fail-on-error="true"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Start workflow on duplicate">
+      <configurations>
+        <configuration key="workflow-definition">ele-lms-publish-duplicate</configuration>
+        <configuration key="media-package">${duplicate_media_package_1_id}</configuration>
+        <configuration key="seriesID">${seriesID}</configuration>
+        <configuration key="annotation">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup the working file repository -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

@@ -1,0 +1,122 @@
+<!-- This workflow can be triggerd from the Admin UI to generate export versions of videos -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-export-after-cutting</id>
+  <title>Export generieren</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+      <!--
+        #workflow-configuration legend { padding-top:20px; padding-bottom:5px }
+        #workflow-configuration li { padding:2px 20px;}
+        #workflow-configuration input[type=checkbox] { padding: 0px; }
+        #workflow-configuration label { display: inline-block; padding: 0px 5px; }
+        #workflow-configuration input:disabled+label{ opacity: 0.5; }
+      -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Zu generierende Export Version:</legend>
+          <ul>
+            <li>
+              <input id="ex-pip-presentation" name="ex-pip-presentation" type="checkbox" class="configField" value="true"/>
+              <label for="ex-pip-presentation">Bild in Bild mit Presentation in groß</label>
+            </li>
+            <li>
+              <input id="ex-pip-presenter" name="ex-pip-presenter" type="checkbox" class="configField" value="true"/>
+              <label for="ex-pip-presenter">Bild in Bild mit Presenter in groß</label>
+            </li>
+            <li>
+              <input id="ex-dual" name="ex-dual" type="checkbox" class="configField" value="true"/>
+              <label for="ex-dual">Presenter und Presentation nebeneinander</label>
+            </li>
+          </ul>
+        </fieldset>
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Prepare the work media                                            -->
+
+    <operation
+      id="include"
+      description="Prepare and mux">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-av</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cut the video according the SMIL file                             -->
+
+    <operation
+      id="editor"
+      exception-handler-workflow="ele-error"
+      description="Cut the recording according to the edit decision list">
+      <configurations>
+        <configuration key="source-flavors">*/work</configuration>
+        <configuration key="smil-flavors">smil/export</configuration>
+        <configuration key="target-smil-flavor">smil/export</configuration>
+        <configuration key="target-flavor-subtype">trimmed</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag SMIL for archival -->
+
+    <operation
+      id="tag"
+      description="Tagging smil for archival">
+      <configurations>
+        <configuration key="source-flavors">smil/export</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the dublin core catalogs created during trim operation for archival and publication -->
+
+    <operation
+      id="tag"
+      description="Tagging metadata catalogs for archival and publication">
+      <configurations>
+        <configuration key="source-flavors">dublincore/*</configuration>
+        <configuration key="target-tags">+archive,+engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include workflow to generate the export files -->
+
+    <operation
+      id="include"
+      description="Create export">
+      <configurations>
+        <configuration key="workflow-id">ele-export</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

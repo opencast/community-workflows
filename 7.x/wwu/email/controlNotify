@@ -1,0 +1,13 @@
+Sehr geehrte Damen und Herren,
+
+die eLectures-Aufnahme mit dem Namen „${catalogs['episode']['title']}“ vom ${mediaPackage.date?date?iso_local} wurde verarbeitet und kann eingesehen werden.
+
+<#if catalogs['extended']['course']?has_content>
+Sie können Ihre Aufnahme in Ihrem Learnweb Kurs einsehen: https://sso.uni-muenster.de/LearnWeb/learnweb2/course/view.php?id=${catalogs['extended']['course']}.
+Wenn Sie möchten, können Sie über den Opencast Block anpassen, wer Zugriff auf die Aufnahme hat.
+</#if>
+
+Wir helfen Ihnen, wie immer, bei Nachfragen gerne weiter.
+Ihr eLectures Team
+
+Dies ist eine automatisierte e-Mail, welche nach Beendigung des Video-Verarbeitungsvorganges an Sie gesendet wird.

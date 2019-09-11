@@ -1,0 +1,42 @@
+<!-- This workflow removes the delivery files from the current archive version. This workflow is meant to be included. -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-remove-delivery-files</id>
+  <title>Remove delivery files</title>
+
+  <operations>
+
+    <!-- Remove archive tag from delivery -->
+
+    <operation
+      id="tag"
+      description="Remove archive tag from delivery">
+      <configurations>
+        <configuration key="source-flavors">*/delivery, oat/*</configuration>
+        <configuration key="target-tags">-archive,-engage-download,-high-quality,-medium-quality,-low-quality</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Remove archive tag from attachments -->
+
+    <operation
+      id="tag"
+      description="Remove archive tag from attachments">
+      <configurations>
+        <configuration key="source-flavors">*/player+preview,*/feed+preview,*/timeline+preview,smil/*</configuration>
+        <configuration key="target-tags">-archive,-engage-download,-atom,-rss</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

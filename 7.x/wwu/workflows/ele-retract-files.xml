@@ -1,0 +1,92 @@
+<!-- This workflow contains the retract operations and is inteded for inclusion in other workflows -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-retract-files</id>
+  <title>Retract</title>
+
+  <operations>
+
+    <!-- Apply default settings -->
+
+    <operation
+      id="defaults"
+      description="Applying default configuration values">
+      <configurations>
+        <configuration key="retractFromEngage">true</configuration>
+        <configuration key="retractPreview">false</configuration>
+        <configuration key="retractAnnotation">true</configuration>
+        <configuration key="retractApi">true</configuration>
+        <configuration key="retractOaipmh">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Retract from engage player -->
+
+    <operation
+      id="retract-engage"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      if="${retractFromEngage}"
+      description="Retract recording from Engage">
+    </operation>
+
+    <!-- Remove the internal publication -->
+
+    <operation
+      id="retract-configure"
+      if="${retractPreview}"
+      exception-handler-workflow="ele-error"
+      description="Retract from internal publication channel">
+      <configurations>
+        <configuration key="channel-id">internal</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Remove from api -->
+
+    <operation
+      id="retract-configure"
+      if="${retractApi}"
+      exception-handler-workflow="ele-error"
+      description="Retract from api publication channel">
+      <configurations>
+        <configuration key="channel-id">api</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Remove from annotation tool -->
+
+    <operation
+      id="retract-configure"
+      if="${retractAnnotation}"
+      exception-handler-workflow="ele-error"
+      description="Retract from annotation channel">
+      <configurations>
+        <configuration key="channel-id">annotation</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Remove from OAI-PMH -->
+
+    <operation
+      id="retract-oaipmh"
+      if="${retractOaipmh}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Retract event from the OAI-PMH repository">
+      <configurations>
+          <configuration key="repository">default</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the current state of the mediapackage -->
+
+    <operation
+      id="snapshot"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Archiving state of retracted recording">
+    </operation>
+
+  </operations>
+</definition>
