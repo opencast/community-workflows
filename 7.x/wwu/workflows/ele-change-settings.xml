@@ -1,0 +1,106 @@
+<!-- The purpose of this workflow is to change the mediapackage settings made during ingest -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-change-settings</id>
+  <title>Mediapackage Einstellungen ändern</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+
+  <!-- Define configuration panel -->
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+      <!--
+        #workflow-configuration legend { padding-top:20px; padding-bottom:5px }
+        #workflow-configuration li { padding:2px 20px;}
+        #workflow-configuration input[type=checkbox] { padding: 0px; }
+        #workflow-configuration label { display: inline-block; padding: 0px 5px; }
+        #workflow-configuration input:disabled+label{ opacity: 0.5; }
+      -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Zu publizierende Streams:</legend>
+          <ul>
+            <li>
+              <input id="presenterfull" name="presenterfull" type="checkbox" class="configField" value="true" />
+              <label for="presenterfull">Presenter (Volles Video in 4K)</label>
+            </li>
+            <li>
+              <input id="presenter" name="presenter" type="checkbox" class="configField" value="true" />
+              <label for="presenter">Presenter (Tracking oder Upload)</label>
+            </li>
+            <li>
+              <input id="presentation" name="presentation" type="checkbox" class="configField" value="true" />
+              <label for="presentation">Presentation 0</label>
+            </li>
+            <li>
+              <input id="presentation-1" name="presentation-1" type="checkbox" class="configField" value="true" />
+              <label for="presentation-1">Presentation 1</label>
+            </li>
+            <li>
+              <ul id="segmentConfigurationPanel" style="display: none" class="workflow-configuration-subpanel">
+                <legend>Segmente generieren für:</legend>
+                <li>
+                  <input id="segment-0" name="segment" type="radio" class="configField" />
+                  <label for="segment-0">Presentation 0</label>
+                </li>
+                <li>
+                  <input id="segment-1" name="segment" type="radio" class="configField" />
+                  <label for="segment-1">Presentation 1</label>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+
+      <script type="text/javascript">
+        $('#presentation, #presentation-1').change(function() {
+            if ($('#presentation')[0].checked &&
+                $('#presentation-1')[0].checked) {
+                $('#segmentConfigurationPanel').show();
+            } else {
+                $('#segmentConfigurationPanel').hide();
+            }
+        })
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Include retract files workflow -->
+
+    <operation
+      id="include"
+      description="Retract everything">
+      <configurations>
+        <configuration key="workflow-id">ele-retract-files</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include workflow to prepare for cutting -->
+
+    <operation
+      id="include"
+      description="Process media">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-cutting</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

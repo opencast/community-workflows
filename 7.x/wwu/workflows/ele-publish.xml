@@ -1,0 +1,78 @@
+<!-- This is the workflow which contains the publishing operations -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-publish</id>
+  <title>Workflow zum publishen</title>
+
+  <operations>
+
+    <!-- Publish to engage  -->
+
+    <operation
+      id="publish-engage"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Publishing to Opencast Media Module">
+      <configurations>
+        <configuration key="download-source-flavors">dublincore/*,security/*</configuration>
+        <configuration key="download-source-tags">engage-download,atom,rss,mobile</configuration>
+        <configuration key="check-availability">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to external api including Paella-->
+
+    <operation
+      id="publish-configure"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Publish to external api publication channel - player">
+      <configurations>
+        <configuration key="channel-id">api</configuration>
+        <configuration key="source-tags">engage-download</configuration>
+        <configuration key="source-flavors">presenter/search+preview</configuration>
+        <configuration key="url-pattern">URLPLACEHOLDER/paella/ui/watch.html?id=${event_id}</configuration>
+        <configuration key="with-published-elements">false</configuration>
+        <configuration key="check-availability">false</configuration>
+        <configuration key="mode">mixed</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to OAI-PMH -->
+
+    <operation
+      id="publish-oaipmh"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Publish to OAI-PMH Default Repository">
+      <configurations>
+        <configuration key="download-flavors">dublincore/*,security/*</configuration>
+        <configuration key="download-tags">engage-download,atom,rss</configuration>
+        <configuration key="check-availability">false</configuration>
+        <configuration key="repository">default</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish to Opencast Annotation Tool -->
+
+    <operation
+      id="publish-configure"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Publish to Annotation publication channel">
+      <configurations>
+        <configuration key="channel-id">annotation</configuration>
+        <configuration key="source-flavors">presenter/delivery,*/search+preview</configuration>
+        <configuration key="url-pattern">URLPLACEHOLDER?id=${event_id}</configuration>
+        <configuration key="with-published-elements">true</configuration>
+        <configuration key="check-availability">false</configuration>
+        <configuration key="mode">mixed</configuration>
+      </configurations>
+    </operation>
+
+    </operations>
+</definition>

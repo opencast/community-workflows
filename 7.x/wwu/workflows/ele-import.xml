@@ -1,0 +1,164 @@
+<!-- This is a workflow that only publishes a imported mediapackage to the editor -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-import</id>
+  <title>Import Mediapackage and publish to editor</title>
+  <description>
+    Ein minimaler Workfow der das Mediapackage zum Editor publiziert
+  </description>
+
+  <operations>
+
+    <!-- Ingest elements -->
+
+    <operation
+      id="ingest-download"
+      description="Ingesting external elements">
+      <configurations>
+        <configuration key="delete-external">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Apply ACL from series to the mediapackage -->
+
+    <operation
+      id="series"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Applying access control entries from series">
+      <configurations>
+        <configuration key="apply-acl">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Inspect the media -->
+
+    <operation
+      id="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Inspecting audio and video streams">
+      <configurations>
+        <configuration key="overwrite">false</configuration>
+        <configuration key="accept-no-media">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Analyse which tracks are available -->
+
+    <operation
+      id="analyze-tracks"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Analyze tracks in media package and set control variables">
+      <configurations>
+        <configuration key="source-flavor">*/source</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Set presenter variable if track is available -->
+
+    <operation
+      id="defaults"
+      if="${presenter_source_video}"
+      description="Applying default values">
+      <configurations>
+        <configuration key="presenter">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Set presenterfull variable if track is available -->
+
+    <operation
+      id="defaults"
+      if="${presenterfull_source_video}"
+      description="Applying default values">
+      <configurations>
+        <configuration key="presenterfull">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Set presentation variable if track is available -->
+
+    <operation
+      id="defaults"
+      if="${presentation_source_video}"
+      description="Applying default values">
+      <configurations>
+        <configuration key="presentation">true</configuration>
+        <configuration key="segment-0">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag previews for the preview channel -->
+
+    <operation
+      id="tag"
+      description="Preparing silence detection for preview">
+      <configurations>
+        <configuration key="source-flavors">composite/delivery</configuration>
+        <configuration key="target-tags">+preview</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Publish previews to editor -->
+
+    <operation
+      id="publish-configure"
+      exception-handler-workflow="ele-error"
+      description="Publish to preview publication channel">
+      <configurations>
+        <configuration key="source-tags">preview</configuration>
+        <configuration key="channel-id">internal</configuration>
+        <configuration key="url-pattern">http://localhost:8080/admin-ng/index.html#/events/events/${event_id}/tools/playback</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Mark the recording for cutting -->
+
+    <operation
+      id="comment"
+      description="Mark the recording for cutting">
+      <configurations>
+        <configuration key="description">Recording has not been cut yet.</configuration>
+        <configuration key="reason">EVENTS.EVENTS.DETAILS.COMMENTS.REASONS.CUTTING</configuration>
+        <configuration key="action">create</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Mark the recording for review -->
+
+    <operation
+      id="comment"
+      description="Mark the recording for review">
+      <configurations>
+        <configuration key="description">Recording has not been reviewed yet.</configuration>
+        <configuration key="reason">EVENTS.EVENTS.DETAILS.COMMENTS.REASONS.REVIEW</configuration>
+        <configuration key="action">create</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the current state of the mediapackage -->
+
+    <operation
+      id="snapshot"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Archiving">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup the working file repository -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

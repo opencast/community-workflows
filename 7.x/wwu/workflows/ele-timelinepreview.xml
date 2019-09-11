@@ -1,0 +1,74 @@
+<!-- This is the workflow that contains all operations needed to create the timeline previews for each flavor -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-timelinepreview</id>
+  <title>Workflow zum erstellen der timeline preview</title>
+
+  <operations>
+
+    <!-- Generate the timeline previews for presentation -->
+
+    <operation
+      id="timelinepreviews"
+      if="${presentation}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create the timeline preview for presentation">
+      <configurations>
+        <configuration key="source-flavor">presentation/themed</configuration>
+        <configuration key="target-flavor">presentation/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="image-count">100</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate the timeline previews for presentation-1 -->
+
+    <operation
+      id="timelinepreviews"
+      if="(NOT(${presentation}) AND ${presentation-1})"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create the timeline preview for presentation-1">
+      <configurations>
+        <configuration key="source-flavor">presentation-1/themed</configuration>
+        <configuration key="target-flavor">presentation-1/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="image-count">100</configuration>
+      </configurations>
+    </operation>
+
+<!-- Generate the timeline previews for presenter -->
+
+    <operation
+      id="timelinepreviews"
+      if="(NOT(${presentation}) AND NOT(${presentation-1}) AND ${presenter})"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create the timeline preview for presenter">
+      <configurations>
+        <configuration key="source-flavor">presenter/themed</configuration>
+        <configuration key="target-flavor">presenter/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="image-count">100</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate the timeline previews for presenterfull -->
+
+    <operation
+      id="timelinepreviews"
+      if="(${presenterfull} AND NOT(${presenter}) AND NOT(${presentation}) AND NOT(${presentation-1}))"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Create the timeline preview for presenterfull">
+      <configurations>
+        <configuration key="source-flavor">presenterfull/themed</configuration>
+        <configuration key="target-flavor">presenterfull/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="image-count">100</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

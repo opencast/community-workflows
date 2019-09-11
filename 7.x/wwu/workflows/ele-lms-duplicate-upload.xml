@@ -1,0 +1,42 @@
+<!-- This workflow creates a copy of a uploaded video -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>ele-lms-duplicate-upload</id>
+  <title>Upload kopieren</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+  <description/>
+
+  <operations>
+
+    <!-- Create the copy -->
+
+    <operation
+      id="duplicate-event"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error"
+      description="Duplicate Event">
+      <configurations>
+        <configuration key="source-flavors">*/*</configuration>
+        <configuration key="number-of-events">1</configuration>
+        <configuration key="target-tags">+copied</configuration>
+        <configuration key="property-namespaces">org.opencastproject.assetmanager.security, org.opencastproject.workflow.configuration</configuration>
+        <configuration key="copy-number-prefix">Kopie</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Cleanup the working file repository -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

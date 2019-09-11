@@ -1,0 +1,96 @@
+<!-- This is the workflow which contains the operations needed to create the segment previews -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-segmentpreviews</id>
+  <title>Workflow zum erstellen der segment previews</title>
+
+  <operations>
+
+    <!-- Run the videosegmentation for presentation -->
+
+    <operation
+      id="segment-video"
+      if="(${presentation} AND NOT(${presentation-1})) OR (${presentation} AND ${presentation-1} AND ${segment-0})"
+      fail-on-error="false"
+      description="Detecting slide transitions in presentation track">
+      <configurations>
+        <configuration key="source-flavor">presentation/themed</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate segment preview images for presentation -->
+
+    <operation
+      id="segmentpreviews"
+      if="(${presentation} AND NOT(${presentation-1})) OR (${presentation} AND ${presentation-1} AND ${segment-0})"
+      fail-on-error="false"
+      description="Creating preview images for presentation segments">
+      <configurations>
+        <configuration key="source-flavor">presentation/themed</configuration>
+        <configuration key="target-flavor">presentation/segment+preview</configuration>
+        <configuration key="reference-flavor">presentation/delivery</configuration>
+        <configuration key="reference-tags">engage-download</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profile">player-slides.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Extract text form slide preview images for presentation -->
+
+    <operation
+      id="extract-text"
+      if="(${presentation} AND NOT(${presentation-1})) OR (${presentation} AND ${presentation-1} AND ${segment-0})"
+      fail-on-error="false"
+      description="Extracting text from presentation segments">
+      <configurations>
+        <configuration key="source-flavor">presentation/themed</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Run the videosegmentation for presentation-1 -->
+
+    <operation
+      id="segment-video"
+      if="(${presentation-1} AND NOT(${presentation})) OR (${presentation-1} AND ${presentation} AND ${segment-1})"
+      fail-on-error="false"
+      description="Detecting slide transitions in presentation-1 track">
+      <configurations>
+        <configuration key="source-flavor">presentation-1/themed</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Generate segment preview images for presentation-1 -->
+
+    <operation
+      id="segmentpreviews"
+      if="(${presentation-1} AND NOT(${presentation})) OR (${presentation-1} AND ${presentation} AND ${segment-1})"
+      fail-on-error="false"
+      description="Creating preview images for presentation-1 segments">
+      <configurations>
+        <configuration key="source-flavor">presentation-1/themed</configuration>
+        <configuration key="target-flavor">presentation-1/segment+preview</configuration>
+        <configuration key="reference-flavor">presentation-1/delivery</configuration>
+        <configuration key="reference-tags">engage-download</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profile">player-slides.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Extract text form slide preview images for presenation-1 -->
+
+    <operation
+      id="extract-text"
+      if="(${presentation-1} AND NOT(${presentation})) OR (${presentation-1} AND ${presentation} AND ${segment-1})"
+      fail-on-error="false"
+      description="Extracting text from presentation-1 segments">
+      <configurations>
+        <configuration key="source-flavor">presentation-1/themed</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

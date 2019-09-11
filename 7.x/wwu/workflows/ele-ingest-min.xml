@@ -1,0 +1,42 @@
+<!-- This is a minimal workflow which only archives an import -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-ingest-min</id>
+  <title>Aufnahme nur ingesten</title>
+
+  <operations>
+
+    <!-- Ingest files  -->
+
+    <operation
+      id="ingest-download"
+      exception-handler-workflow="ele-error"
+      description="Ingesting external elements">
+      <configurations>
+        <configuration key="delete-external">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag source flavours for archival-->
+
+    <operation
+      id="tag"
+      description="Tagging for archival">
+      <configurations>
+        <configuration key="source-flavors">*/*</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the source material -->
+
+    <operation
+      id="snapshot"
+      description="Archive raw recording after ingest">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

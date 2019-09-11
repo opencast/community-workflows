@@ -1,0 +1,43 @@
+<!-- This workflow contains the operations needed to correct the multiencode tagging for the theodul player -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-tag-quality</id>
+  <title>Workflow zum taggen der Qualitäten für den Player</title>
+
+  <operations>
+
+    <!-- Tag low quality -->
+
+    <operation
+      id="tag"
+      description="tag the targets for player">
+      <configurations>
+        <configuration key="source-tags">4k-low.http,beamer-low.http,tracking-low.http,lms-low.http</configuration>
+        <configuration key="target-tags">+low-quality</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag medium quality -->
+
+    <operation
+      id="tag"
+      description="tag the targets for player">
+      <configurations>
+        <configuration key="source-tags">4k-medium.http,beamer-medium.http,tracking-medium.http,lms-medium.http</configuration>
+        <configuration key="target-tags">+medium-quality</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag high quality -->
+
+    <operation
+      id="tag"
+      description="tag the targets for player">
+      <configurations>
+        <configuration key="source-tags">4k-high.http,beamer-high.http,tracking-high.http,lms-high.http</configuration>
+        <configuration key="target-tags">+high-quality</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

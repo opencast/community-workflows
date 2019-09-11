@@ -1,0 +1,82 @@
+<!-- This workflow contains the operations for creating the work flavors -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-prepare-av</id>
+  <title>Workflow zum erstellen der work versionen und muxing</title>
+
+  <operations>
+
+    <!-- Prepare presenterfull work flavor -->
+
+    <operation
+      id="prepare-av"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenterfull}"
+      exception-handler-workflow="ele-error"
+      description="Preparing presenterfull work versions">
+      <configurations>
+        <configuration key="source-flavor">presenterfull/source</configuration>
+        <configuration key="target-flavor">presenterfull/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="audio-muxing-source-flavors">presenter-audio/source,presenter/source,presenterfull/source,*/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare presentation work flavor -->
+
+    <operation
+      id="prepare-av"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation}"
+      exception-handler-workflow="ele-error"
+      description="Preparing presentation work version">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="audio-muxing-source-flavors">presenter-audio/source,presenter/source,presenterfull/source,*/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare presentation-1 work flavor -->
+
+    <operation
+      id="prepare-av"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation-1}"
+      exception-handler-workflow="ele-error"
+      description="Preparing presentation-1 work version">
+      <configurations>
+        <configuration key="source-flavor">presentation-1/source</configuration>
+        <configuration key="target-flavor">presentation-1/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="audio-muxing-source-flavors">presenter-audio/source,presenter/source,presenterfull/source,*/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare presenter work flavor -->
+
+    <operation
+      id="prepare-av"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenter}"
+      exception-handler-workflow="ele-error"
+      description="Preparing presenter work version">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="audio-muxing-source-flavors">presenter-audio/source,presenter/source,presenterfull/source,*/*</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

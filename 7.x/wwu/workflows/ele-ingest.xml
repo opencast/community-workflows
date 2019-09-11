@@ -1,0 +1,194 @@
+<!-- This workflow contains the operations needed for ingesting or uploading recordings -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-ingest</id>
+  <title>Aufnahme planen oder hochladen</title>
+  <tags>
+    <tag>schedule</tag>
+    <tag>upload</tag>
+  </tags>
+
+<!-- Define the configuration panel -->
+
+  <configuration_panel>
+    <![CDATA[
+      <style type="text/css">
+      <!--
+        #workflow-configuration legend { padding-top:20px; padding-bottom:5px }
+        #workflow-configuration li { padding:2px 20px;}
+        #workflow-configuration input[type=checkbox] { padding: 0px; }
+        #workflow-configuration label { display: inline-block; padding: 0px 5px; }
+        #workflow-configuration input:disabled+label{ opacity: 0.5; }
+      -->
+      </style>
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Zu publizierende Streams:</legend>
+          <ul>
+            <li>
+              <input id="presenterfull" name="presenterfull" type="checkbox" class="configField" value="true" />
+              <label for="presenterfull">Presenter (Totale in 4K)</label>
+            </li>
+            <li>
+              <input id="presenter" name="presenter" type="checkbox" class="configField" value="true" />
+              <label for="presenter">Presenter (Tracking)</label>
+            </li>
+            <li>
+              <input id="presentation" name="presentation" type="checkbox" class="configField" value="true" />
+              <label for="presentation">Presentation 0</label>
+            </li>
+            <li>
+              <input id="presentation-1" name="presentation-1" type="checkbox" class="configField" value="true" />
+              <label for="presentation-1">Presentation 1</label>
+            </li>
+              <li>
+                <ul id="segmentConfigurationPanel" style="display: none" class="workflow-configuration-subpanel">
+                  <legend>Segmente generieren für:</legend>
+                  <li>
+                    <input id="segment-0" name="segment" type="radio" class="configField" checked="checked"/>
+                    <label for="segment-0">Presentation 0</label>
+                  </li>
+                  <li>
+                    <input id="segment-1" name="segment" type="radio" class="configField" />
+                    <label for="segment-1">Presentation 1</label>
+                  </li>
+                </ul>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+
+      <script type="text/javascript">
+        $('#presentation, #presentation-1').change(function() {
+            if ($('#presentation')[0].checked &&
+                $('#presentation-1')[0].checked) {
+                $('#segmentConfigurationPanel').show();
+            } else {
+                $('#segmentConfigurationPanel').hide();
+            }
+        })
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Apply the default workflow configuration -->
+
+    <operation
+      id="defaults"
+      description="Applying default configuration values">
+      <configurations>
+        <configuration key="presenterfull">false</configuration>
+        <configuration key="presenter">false</configuration>
+        <configuration key="presentation">false</configuration>
+        <configuration key="presentation-1">false</configuration>
+        <configuration key="segment-0">false</configuration>
+        <configuration key="segment-1">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Ingest elements from external working file repositories and file servers -->
+
+    <operation
+      id="ingest-download"
+      exception-handler-workflow="ele-error"
+      description="Ingesting external elements">
+      <configurations>
+        <configuration key="delete-external">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Inspect the media -->
+
+    <operation
+      id="inspect"
+      exception-handler-workflow="ele-error"
+      description="Inspecting audio and video streams">
+      <configurations>
+        <configuration key="overwrite">false</configuration>
+        <configuration key="accept-no-media">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Apply access control lists and metadata from series to the mediapackage -->
+
+    <operation
+      id="series"
+      exception-handler-workflow="ele-error"
+      description="Apply series metadata and acl">
+      <configurations>
+        <configuration key="attach">*/*</configuration>
+        <configuration key="apply-acl">true</configuration>
+        <configuration key="copy-metadata">creator, license, language</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag source flavours for archival-->
+
+    <operation
+      id="tag"
+      description="Tagging source flavours for archival">
+      <configurations>
+        <configuration key="source-flavors">*/source,attachment/consent</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the incoming metadata catalogs for publishing -->
+
+    <operation
+      id="tag"
+      description="Tagging metadata catalogs for publication">
+      <configurations>
+        <configuration key="source-flavors">dublincore/*,security/*</configuration>
+        <configuration key="target-tags">+engage-download,+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the source material -->
+
+    <operation
+      id="snapshot"
+      description="Archive raw recording after ingest">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Set the control workflow variable based on the extended metadata catalog -->
+
+    <operation
+      id="configure-by-dcterm"
+      fail-on-error="true"
+      description="Configure control by dcterm">
+      <configurations>
+        <configuration key="dccatalog">extended</configuration>
+        <configuration key="dcterm">checkRecordings</configuration>
+        <configuration key="match-value">true</configuration>
+        <configuration key="control">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Prepare the work media for cutting  -->
+
+    <operation
+      id="include"
+      description="Prepare the work media for cutting">
+      <configurations>
+        <configuration key="workflow-id">ele-prepare-cutting</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

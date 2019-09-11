@@ -1,0 +1,44 @@
+<!-- This workflow contains the operations needed to archive uploaded assets. It is only triggerd upon upload. -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-archive-uploaded-assets</id>
+  <title>Archive uploaded assets</title>
+  <description>Archive uploaded assets</description>
+
+  <operations>
+
+    <!-- Tag for archive -->
+
+    <operation
+      id="tag"
+      exception-handler-workflow="ele-error"
+      description="Tagging media package elements for archival">
+      <configurations>
+        <configuration key="source-flavors">*/*</configuration>
+        <configuration key="target-tags">+archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the current state of the mediapackage -->
+
+    <operation
+      id="snapshot"
+      description="Archiving new assets">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">ele-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

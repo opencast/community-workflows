@@ -1,0 +1,140 @@
+<!-- This is the workflow that contains the operations needed to prepare a recording for publishing -->
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-prepare-publish</id>
+  <title>Prepare the recording for publishing</title>
+
+  <operations>
+
+    <!-- Cut the video according the SMIL file                             -->
+
+    <operation
+      id="editor"
+      retry-strategy="hold"
+      max-attempts="5"
+      exception-handler-workflow="ele-error"
+      description="Cut the recording according to the edit decision list">
+      <configurations>
+        <configuration key="source-flavors">*/work</configuration>
+        <configuration key="skipped-flavors">*/work</configuration>
+        <configuration key="smil-flavors">smil/cutting</configuration>
+        <configuration key="target-smil-flavor">smil/cutting</configuration>
+        <configuration key="target-flavor-subtype">trimmed</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the smil for archival and change flavor for export-->
+
+    <operation
+      id="tag"
+      description="Tagging smil catalog">
+      <configurations>
+        <configuration key="source-flavors">smil/cutting</configuration>
+        <configuration key="target-tags">+archive</configuration>
+        <configuration key="target-flavor">smil/export</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag the dublin core catalogs created during trim operation for archival and publication -->
+
+    <operation
+      id="tag"
+      description="Tagging metadata catalogs for archival and publication">
+      <configurations>
+        <configuration key="source-flavors">dublincore/*</configuration>
+        <configuration key="target-tags">+archive,+engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the workflow to create the branding -->
+
+    <operation
+      id="include"
+      description="Create branding">
+      <configurations>
+        <configuration key="workflow-id">ele-branding</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode to engage search result thumbnails -->
+
+    <operation
+      id="image"
+      exception-handler-workflow="ele-error"
+      description="Creating search result thumbnails">
+      <configurations>
+        <configuration key="source-flavor">*/themed</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">*/search+preview</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profile">ele-search-cover.http</configuration>
+        <configuration key="time">6</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the workflow to create the coverimage  -->
+
+    <operation
+      id="include"
+      description="Include coverimage workflow">
+      <configurations>
+        <configuration key="workflow-id">ele-coverimage</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Tag cover image for feeds -->
+
+    <operation
+      id="tag"
+      exception-handler-workflow="ele-error"
+      description="Tag feed image">
+      <configurations>
+        <configuration key="source-flavors">*/player+preview</configuration>
+        <configuration key="target-tags">+atom,+rss</configuration>
+        <configuration key="target-flavor">*/feed+preview</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the encoding workflow -->
+
+    <operation
+      id="include"
+      description="Include encode">
+      <configurations>
+        <configuration key="workflow-id">ele-encode</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the workflow which corrects the tagging for the theodul player -->
+
+    <operation
+      id="include"
+      description="Include tagging workflow for theodul">
+      <configurations>
+        <configuration key="workflow-id">ele-tag-quality</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the workflow for the videosegmentation -->
+
+    <operation
+      id="include"
+      description="Run the videosegmentation">
+      <configurations>
+        <configuration key="workflow-id">ele-segmentpreviews</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Include the workflow to generate the timeline preview -->
+
+    <operation
+      id="include"
+      description="Generate the timeline preview">
+      <configurations>
+        <configuration key="workflow-id">ele-timelinepreview</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

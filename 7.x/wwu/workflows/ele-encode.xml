@@ -1,0 +1,82 @@
+<!-- This is the workflow which contains the encoding operations -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-encode</id>
+  <title>Videos encodieren</title>
+
+  <operations>
+
+    <!-- Encode presenterfull -->
+
+    <operation
+      id="multiencode"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenterfull}"
+      exception-handler-workflow="ele-error"
+      description="Encode presenterfull to MP4 download">
+      <configurations>
+        <configuration key="source-flavors">presenterfull/themed</configuration>
+        <configuration key="target-flavors">presenterfull/delivery</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profiles">4k-low.http,4k-medium.http,4k-high.http</configuration>
+        <configuration key="tag-with-profile">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode presentation -->
+
+    <operation
+      id="multiencode"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation}"
+      exception-handler-workflow="ele-error"
+      description="Encode presentation to MP4 download">
+      <configurations>
+        <configuration key="source-flavors">presentation/themed</configuration>
+        <configuration key="target-flavors">presentation/delivery</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profiles">beamer-low.http,beamer-medium.http,beamer-high.http</configuration>
+        <configuration key="tag-with-profile">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode presentation-1 -->
+
+    <operation
+      id="multiencode"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation-1}"
+      exception-handler-workflow="ele-error"
+      description="Encode presentation-1 to MP4 download">
+      <configurations>
+        <configuration key="source-flavors">presentation-1/themed</configuration>
+        <configuration key="target-flavors">presentation-1/delivery</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profiles">beamer-low.http,beamer-medium.http,beamer-high.http</configuration>
+        <configuration key="tag-with-profile">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Encode presenter-->
+
+    <operation
+      id="multiencode"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenter}"
+      exception-handler-workflow="ele-error"
+      description="Encode presenter to MP4 download">
+      <configurations>
+        <configuration key="source-flavors">presenter/themed</configuration>
+        <configuration key="target-flavors">presenter/delivery</configuration>
+        <configuration key="target-tags">engage-download,archive</configuration>
+        <configuration key="encoding-profiles">tracking-low.http,tracking-medium.http,tracking-high.http</configuration>
+        <configuration key="tag-with-profile">true</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

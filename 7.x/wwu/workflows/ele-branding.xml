@@ -1,0 +1,124 @@
+<!-- This is the workflow which includes the operations to apply the branding -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-branding</id>
+  <title>Workflow zum erstellen des branding</title>
+
+  <operations>
+
+    <!-- Apply the theme to the mediapackage -->
+
+    <operation
+      id="theme"
+      exception-handler-workflow="ele-error"
+      description="Apply the theme">
+      <configurations>
+        <configuration key="bumper-flavor">branding/bumper</configuration>
+        <configuration key="bumper-tags">archive</configuration>
+        <configuration key="trailer-flavor">branding/trailer</configuration>
+        <configuration key="trailer-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Inspect the media from the theme -->
+
+    <operation
+      id="inspect"
+      exception-handler-workflow="ele-error"
+      description="Inspecting audio and video streams">
+      <configurations>
+        <configuration key="overwrite">false</configuration>
+        <configuration key="accept-no-media">false</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Add bumper and trailer part to the presentation track -->
+
+    <operation
+      id="concat"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation}"
+      exception-handler-workflow="ele-error"
+      description="Concatenate presentation track with intro and outro videos">
+      <configurations>
+        <configuration key="source-flavor-part-0">branding/bumper</configuration>
+        <configuration key="source-flavor-part-0-mandatory">${theme_bumper_active}</configuration>
+        <configuration key="source-flavor-part-1">presentation/trimmed</configuration>
+        <configuration key="source-flavor-part-1-mandatory">true</configuration>
+        <configuration key="source-flavor-part-2">branding/trailer</configuration>
+        <configuration key="source-flavor-part-2-mandatory">${theme_trailer_active}</configuration>
+        <configuration key="target-flavor">presentation/themed</configuration>
+        <configuration key="encoding-profile">concat.ele</configuration>
+        <configuration key="output-resolution">1920x1080</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Add bumper and trailer part to the presentation-1 track -->
+
+    <operation
+      id="concat"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presentation-1}"
+      exception-handler-workflow="ele-error"
+      description="Concatenate presentation-1 track with intro and outro videos">
+      <configurations>
+        <configuration key="source-flavor-part-0">branding/bumper</configuration>
+        <configuration key="source-flavor-part-0-mandatory">${theme_bumper_active}</configuration>
+        <configuration key="source-flavor-part-1">presentation-1/trimmed</configuration>
+        <configuration key="source-flavor-part-1-mandatory">true</configuration>
+        <configuration key="source-flavor-part-2">branding/trailer</configuration>
+        <configuration key="source-flavor-part-2-mandatory">${theme_trailer_active}</configuration>
+        <configuration key="target-flavor">presentation-1/themed</configuration>
+        <configuration key="encoding-profile">concat.ele</configuration>
+        <configuration key="output-resolution">1920x1080</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Add bumper and trailer part to the presenter track -->
+
+    <operation
+      id="concat"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenter}"
+      exception-handler-workflow="ele-error"
+      description="Concatenate presenter track with intro and outro videos">
+      <configurations>
+        <configuration key="source-flavor-part-0">branding/bumper</configuration>
+        <configuration key="source-flavor-part-0-mandatory">${theme_bumper_active}</configuration>
+        <configuration key="source-flavor-part-1">presenter/trimmed</configuration>
+        <configuration key="source-flavor-part-1-mandatory">true</configuration>
+        <configuration key="source-flavor-part-2">branding/trailer</configuration>
+        <configuration key="source-flavor-part-2-mandatory">${theme_trailer_active}</configuration>
+        <configuration key="target-flavor">presenter/themed</configuration>
+        <configuration key="encoding-profile">concat.ele</configuration>
+        <configuration key="output-resolution">1280x720</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Add bumper and trailer part to the presenterfull track -->
+
+    <operation
+      id="concat"
+      retry-strategy="hold"
+      max-attempts="5"
+      if="${presenterfull}"
+      exception-handler-workflow="ele-error"
+      description="Concatenate presenterfull track with intro and outro videos">
+      <configurations>
+        <configuration key="source-flavor-part-0">branding/bumper</configuration>
+        <configuration key="source-flavor-part-0-mandatory">${theme_bumper_active}</configuration>
+        <configuration key="source-flavor-part-1">presenterfull/trimmed</configuration>
+        <configuration key="source-flavor-part-1-mandatory">true</configuration>
+        <configuration key="source-flavor-part-2">branding/trailer</configuration>
+        <configuration key="source-flavor-part-2-mandatory">${theme_trailer_active}</configuration>
+        <configuration key="target-flavor">presenterfull/themed</configuration>
+        <configuration key="encoding-profile">concat.ele</configuration>
+        <configuration key="output-resolution">3840x2160</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

@@ -1,0 +1,184 @@
+<!-- This workflows contains the operations needed to create the editor previews based on the work flavors -->
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+  <id>ele-previews</id>
+  <title>Workflow zum erstellen der Previews</title>
+
+  <operations>
+
+    <!-- Create preview for just one flavor -->
+
+    <operation
+      id="compose"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create single-stream video preview"
+      if="(NOT(${presenterfull}) AND NOT(${presenter}) AND NOT(${presentation}) AND ${presentation-1}) OR (NOT(${presenterfull}) AND ${presenter} AND NOT(${presentation}) AND NOT(${presentation-1})) OR (${presenterfull} AND NOT(${presenter}) AND NOT(${presentation}) AND NOT(${presentation-1})) OR (NOT(${presenterfull}) AND NOT(${presenter}) AND ${presentation} AND NOT(${presentation-1}))"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavors">presenterfull/work,presenter/work,presentation/work,presentation-1/work</configuration>
+        <configuration key="target-flavor">*/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="encoding-profile">ele-preview.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of two presentation flavors -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presentation and presentation-1"
+      if="NOT(${presenterfull}) AND NOT(${presenter}) AND ${presentation} AND ${presentation-1}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presentation/work</configuration>
+        <configuration key="source-flavor-upper">presentation-1/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of presenter and presentation-1 -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presenter and presentation-1"
+      if="${presenter} AND NOT(${presentation}) AND ${presentation-1}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presenter/work</configuration>
+        <configuration key="source-flavor-upper">presentation-1/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of presenter and presentation -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presenter and presentation"
+      if="${presenter} AND ${presentation}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presenter/work</configuration>
+        <configuration key="source-flavor-upper">presentation/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of presenterfull and presentation-1 -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presenterfull and presentation-1"
+      if="${presenterfull} AND NOT(${presenter}) AND NOT(${presentation}) AND ${presentation-1}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presenterfull/work</configuration>
+        <configuration key="source-flavor-upper">presentation-1/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of presenterfull and presentation -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presenterfull and presentation"
+      if="${presenterfull} AND NOT(${presenter}) AND ${presentation}"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presenterfull/work</configuration>
+        <configuration key="source-flavor-upper">presentation/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+    <!-- Create preview for the case of presenterfull and presenter -->
+
+    <operation
+      id="composite"
+      retry-strategy="hold"
+      max-attempts="5"
+      description="Create dual-stream video preview for presenterfull and presenter"
+      if="${presenterfull} AND ${presenter} AND NOT(${presentation}) AND NOT(${presentation-1})"
+      fail-on-error="true"
+      exception-handler-workflow="ele-error">
+      <configurations>
+        <configuration key="source-flavor-lower">presenterfull/work</configuration>
+        <configuration key="source-flavor-upper">presenter/work</configuration>
+        <configuration key="encoding-profile">mp4-preview.dual.http</configuration>
+        <configuration key="target-flavor">composite/preview</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="output-resolution">1280x400</configuration>
+        <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="layout">preview</configuration>
+        <configuration key="layout-preview">
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
+          {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":0.0,"top":0.0},"reference":{"left":0.0,"top":0.0},"offset":{"x":0,"y":0}}};
+        </configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>
