@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>partial-work</id>
-  <title>Prepare work versions</title>
+  <id>partial-work-llz</id>
+  <title>@LLZ: Prepare work versions</title>
   <tags/>
   <description/>
 
@@ -19,11 +19,52 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Re-encode sources to fix potential file format issues"
+      if="${flagRewrite}">
+      <configurations>
+         <configuration key="source-flavor">*/source</configuration>
+         <configuration key="target-flavor">*/reencoded</configuration>
+         <configuration key="encoding-profile">av.work-llz</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presentation)"
+      if="NOT (${flagRewrite})">
+      <configurations>
+        <configuration key="source-flavors">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/reencoded</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presenter)"
+      if="NOT (${flagRewrite})">
+      <configurations>
+        <configuration key="source-flavors">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/reencoded</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+
+    <operation
       id="select-tracks"
       exception-handler-workflow="partial-error"
       description="Preparing presenter (camera) audio and video work versions">
       <configurations>
-        <configuration key="source-flavor">*/source</configuration>
+        <configuration key="source-flavor">*/reencoded</configuration>
         <configuration key="target-flavor">*/work</configuration>
         <configuration key="target-tags">-archive</configuration>
       </configurations>

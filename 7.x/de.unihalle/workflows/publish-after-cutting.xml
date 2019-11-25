@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>publish-after-cutting</id>
-  <title>Publish</title>
+  <id>publish-after-cutting-llz</id>
+  <title>@LLZ: Cut and publish</title>
   <tags>
     <tag>editor</tag>
   </tags>
@@ -17,11 +17,14 @@
       id="defaults"
       description="Applying default configuration values">
       <configurations>
+        <configuration key="flagRewrite">false</configuration>
         <configuration key="publishToEngage">true</configuration>
         <configuration key="publishToApi">true</configuration>
         <configuration key="publishToYouTube">false</configuration>
         <configuration key="thumbnailType">0</configuration>
         <configuration key="thumbnailPosition">1</configuration>
+        <configuration key="flagSegmentation">true</configuration>
+        <configuration key="pCoverTime">1</configuration>
       </configurations>
     </operation>
 
@@ -57,7 +60,7 @@
       id="include"
       description="Prepare the recording for further processing">
       <configurations>
-        <configuration key="workflow-id">partial-work</configuration>
+        <configuration key="workflow-id">partial-work-llz</configuration>
       </configurations>
     </operation>
 
@@ -74,7 +77,7 @@
       id="include"
       description="Publish the recording">
       <configurations>
-        <configuration key="workflow-id">partial-publish</configuration>
+        <configuration key="workflow-id">partial-publish-llz</configuration>
       </configurations>
     </operation>
 

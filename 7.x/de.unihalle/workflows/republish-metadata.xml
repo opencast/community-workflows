@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>republish-metadata</id>
-  <title>Republish metadata</title>
+  <id>republish-metadata-llz</id>
+  <title>@LLZ: Republish metadata</title>
   <tags>
     <tag>archive</tag>
   </tags>
   <description/>
-  <displayOrder>900</displayOrder>
+  <displayOrder>899</displayOrder>
   <configuration_panel>
     <![CDATA[
       <div id="workflow-configuration">
@@ -43,7 +43,7 @@
       description="Applying default configuration values">
       <configurations>
         <configuration key="publishToEngage">true</configuration>
-        <configuration key="publishToOaiPmh">true</configuration>
+        <configuration key="publishToOaiPmh">false</configuration>
         <configuration key="publishToYouTube">false</configuration>
       </configurations>
     </operation>

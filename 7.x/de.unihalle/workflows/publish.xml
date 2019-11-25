@@ -1,39 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>publish</id>
-  <title>Publish</title>
+  <id>publish-llz</id>
+  <title>@LLZ: Publish</title>
   <tags>
     <tag>archive</tag>
   </tags>
-  <displayOrder>1000</displayOrder>
+  <displayOrder>500</displayOrder>
   <description/>
   <configuration_panel>
     <![CDATA[
       <div id="workflow-configuration">
-
         <fieldset>
-          <legend>Video Qualities</legend>
+          <legend>Processing options:</legend>
           <ul>
             <li>
-              <input id="flagQuality360p" name="flagQuality360p" type="checkbox" class="configField" value="false" />
-              <label for="flagQuality360p">360p resolution</label>
-            </li>
-            <li>
-              <input id="flagQuality480p" name="flagQuality480p" type="checkbox" class="configField" value="false" />
-              <label for="flagQuality480p">480p resolution</label>
-            </li>
-            <li>
-              <input id="flagQuality720p" name="flagQuality720p" type="checkbox" class="configField" value="true" checked="checked"/>
-              <label for="flagQuality720p">720p resolution (HDready)</label>
-            </li>
-            <li>
-              <input id="flagQuality1080p" name="flagQuality1080p" type="checkbox" class="configField" value="false" />
+              <input id="flagQuality1080p" name="flagQuality1080p" type="checkbox" class="configField" value="true" />
               <label for="flagQuality1080p">1080p resolution (FullHD)</label>
             </li>
             <li>
-              <input id="flagQuality2160p" name="flagQuality2160p" type="checkbox" class="configField" value="false" />
+              <input id="flagQuality2160p" name="flagQuality2160p" type="checkbox" class="configField" value="true" />
               <label for="flagQuality2160p">2160p resolution (UltraHD)</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagRewrite" name="flagRewrite" type="checkbox" class="configField" value="true" />
+              <label for="flagRewrite">Fix file format issues (slower, lower quality result)</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagSegmentation" name="flagSegmentation" type="checkbox" class="configField" value="true" checked="checked" />
+              <label for="flagSegmentation">Detect video segments</label>
+            </li>
+
+          </ul>
+
+          <ul>
+            <li>
+              <input id="pCoverImage" type="checkbox" name="pCoverImage" value="true" class="configField" />
+              <label for="pCoverImage">Create a player cover image with text</label>
+            </li>
+            <li>
+              <label for="pCoverTime">Take cover image at [s]:</label>
+              <input id="pCoverTime" type="number" step="0.001" name="pCoverTime" value="1.000" class="configField" placeholder="time in s" required />
             </li>
           </ul>
         </fieldset>
@@ -61,7 +74,7 @@
                 <label for="publishToApi">External Applications</label>
               </li>
               <li>
-                <input id="publishToOaiPmh" name="publishToOaiPmh" type="checkbox" checked="checked" class="configField" value="true" />
+                <input id="publishToOaiPmh" name="publishToOaiPmh" type="checkbox" class="configField" value="true" />
                 <label for="publishToOaiPmh">OAI-PMH Default Repository</label>
               </li>
               <li>
@@ -131,16 +144,17 @@
       id="defaults"
       description="Applying default configuration values">
       <configurations>
+        <configuration key="flagRewrite">false</configuration>
         <configuration key="flagForCutting">false</configuration>
-        <configuration key="flagForReview">false</configuration>
-        <configuration key="flagQuality360p">false</configuration>
-        <configuration key="flagQuality480p">false</configuration>
-        <configuration key="flagQuality720p">true</configuration>
+        <configuration key="flagForReview">true</configuration>
         <configuration key="flagQuality1080p">false</configuration>
         <configuration key="flagQuality2160p">false</configuration>
+        <configuration key="flagSegmentation">true</configuration>
+        <configuration key="pCoverImage">false</configuration>
+        <configuration key="pCoverTime">1</configuration>
         <configuration key="publishToEngage">true</configuration>
         <configuration key="publishToApi">true</configuration>
-        <configuration key="publishToOaiPmh">true</configuration>
+        <configuration key="publishToOaiPmh">false</configuration>
         <configuration key="publishToYouTube">false</configuration>
         <configuration key="publishToAws">false</configuration>
         <configuration key="uploadedSearchPreview">false</configuration>
@@ -163,7 +177,7 @@
       id="include"
       description="Prepare the recording for further processing">
       <configurations>
-        <configuration key="workflow-id">partial-work</configuration>
+        <configuration key="workflow-id">partial-work-llz</configuration>
       </configurations>
     </operation>
 
@@ -180,7 +194,7 @@
       id="include"
       description="Publish the recording">
       <configurations>
-        <configuration key="workflow-id">partial-publish</configuration>
+        <configuration key="workflow-id">partial-publish-llz</configuration>
       </configurations>
     </operation>
 

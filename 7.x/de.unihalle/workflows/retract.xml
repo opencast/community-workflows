@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>retract</id>
-  <title>Retract</title>
+  <id>retract-llz</id>
+  <title>@LLZ: Retract</title>
   <tags>
     <tag>archive</tag>
     <tag>delete</tag>
   </tags>
-  <description>Retract a recording</description>
-  <displayOrder>100</displayOrder>
+  <description>@LLZ: Retract a recording</description>
+  <displayOrder>99</displayOrder>
   <configuration_panel>
     <![CDATA[
       <div id="workflow-configuration">
@@ -32,7 +32,7 @@
               <label for="retractPreview">Preview and Editing Media</label>
             </li>
             <li>
-              <input id="retractFromOaiPmh" type="checkbox" checked="checked" class="configField" value="true" />
+              <input id="retractFromOaiPmh" type="checkbox" class="configField" value="true" />
               <label for="retractFromOaiPmh">Default OAI-PMH Repository</label>
             </li>
             <li>
@@ -56,7 +56,7 @@
         <configuration key="retractFromAws">true</configuration>
         <configuration key="retractFromApi">true</configuration>
         <configuration key="retractPreview">true</configuration>
-        <configuration key="retractFromOaiPmh">true</configuration>
+        <configuration key="retractFromOaiPmh">false</configuration>
         <configuration key="retractFromYouTube">false</configuration>
       </configurations>
     </operation>

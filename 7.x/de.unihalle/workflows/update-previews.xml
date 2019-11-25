@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>update-previews</id>
-  <title>Update previews</title>
+  <id>update-previews-llz</id>
+  <title>@LLZ: Create or update preview/editor video</title>
   <tags>
     <tag>archive</tag>
   </tags>
@@ -37,7 +37,7 @@
         id="include"
         description="Prepare the recording for further processing">
         <configurations>
-          <configuration key="workflow-id">partial-work</configuration>
+          <configuration key="workflow-id">partial-work-llz</configuration>
         </configurations>
       </operation>
 
@@ -47,7 +47,7 @@
         id="include"
         description="Prepare preview versions of the recording">
         <configurations>
-          <configuration key="workflow-id">partial-preview</configuration>
+          <configuration key="workflow-id">partial-preview-llz</configuration>
         </configurations>
       </operation>
 

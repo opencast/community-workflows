@@ -18,7 +18,7 @@
       description="Applying default configuration values">
       <configurations>
         <configuration key="publishToEngage">true</configuration>
-        <configuration key="publishToOaiPmh">true</configuration>
+        <configuration key="publishToOaiPmh">false</configuration>
         <configuration key="publishToYouTube">false</configuration>
       </configurations>
     </operation>

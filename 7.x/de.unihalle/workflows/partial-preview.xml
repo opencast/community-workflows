@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition xmlns="http://workflow.opencastproject.org">
 
-  <id>partial-preview</id>
+  <id>partial-preview-llz</id>
   <title>Prepare preview artifacts</title>
   <tags/>
   <description/>
@@ -53,6 +53,7 @@
         <configuration key="target-tags">preview</configuration>
         <configuration key="output-resolution">1280x400</configuration>
         <configuration key="output-background">0x000000FF</configuration>
+        <configuration key="source-audio-name">both</configuration>
         <configuration key="layout">preview</configuration>
         <configuration key="layout-preview">
           {"horizontalCoverage":0.5,"anchorOffset":{"referring":{"left":1.0,"top":0.0},"reference":{"left":1.0,"top":0.0},"offset":{"x":0,"y":0}}};
@@ -232,7 +233,7 @@
       <configurations>
         <configuration key="source-tags">preview</configuration>
         <configuration key="channel-id">internal</configuration>
-        <configuration key="url-pattern">http://localhost:8080/admin-ng/index.html#/events/events/${event_id}/tools/playback</configuration>
+        <configuration key="url-pattern">/admin-ng/index.html#/events/events/${event_id}/tools/editor</configuration>
         <configuration key="check-availability">true</configuration>
       </configurations>
     </operation>
