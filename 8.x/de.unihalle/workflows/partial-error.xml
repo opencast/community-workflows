@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>partial-error</id>
+  <description>Cleanup after a processing failure</description>
+  <operations>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Mark as failed                                                    -->
+    <!--                                                                   -->
+    <!-- Mark recording as failed,                               -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Mark the recording for review -->
+
+    <operation
+      id="comment"
+      fail-on-error="false"
+      description="Mark the recording for review because of a failure">
+      <configurations>
+        <configuration key="description">Processing failed</configuration>
+        <configuration key="reason">EVENTS.EVENTS.DETAILS.COMMENTS.REASONS.PROCESSING_FAILURE</configuration>
+        <configuration key="action">create</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Archive the current state of the media package -->
+
+    <operation
+      id="snapshot"
+      fail-on-error="false"
+      description="Preserve the current recording state">
+      <configurations>
+        <configuration key="source-flavors">*/source,dublincore/*,security/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Clean up the temporary files from the working file repository -->
+
+    <operation
+      id="cleanup"
+      fail-on-error="false"
+      description="Cleaning up">
+      <configurations>
+        <configuration key="delete-external">true</configuration>
+        <!-- FixMe Don't clean up ACLs until workflow service no longer looks for them in the WFR. -->
+        <configuration key="preserve-flavors">security/*</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>
