@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>partial-work-llz</id>
+  <title>@LLZ: Prepare work versions</title>
+  <tags/>
+  <description/>
+
+  <configuration_panel></configuration_panel>
+
+  <operations>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Prepare the work media                                            -->
+    <!--                                                                   -->
+    <!-- Ensure the work media is in a format that allows Opencast to do   -->
+    <!-- its work. This includes potentially rewriting the container and   -->
+    <!-- making sure that the audio track is part of each video track.     -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Re-encode sources to fix potential file format issues"
+      if="${flagRewrite} AND NOT (${flagRewriteStudio}) AND NOT (${normalizeAudio})">
+      <configurations>
+         <configuration key="source-flavor">*/source</configuration>
+         <configuration key="target-flavor">*/reencoded</configuration>
+         <configuration key="encoding-profile">av.work-llz</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Re-encode sources to fix potential file format issues (normalize)"
+      if="${flagRewrite} AND NOT (${flagRewriteStudio}) AND (${normalizeAudio})">
+      <configurations>
+         <configuration key="source-flavor">*/source</configuration>
+         <configuration key="target-flavor">*/reencoded</configuration>
+         <configuration key="encoding-profile">av.work-normalize-llz</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Re-encode Opencast Studio Recording to fix framerate and resolution"
+      if="${flagRewriteStudio} AND NOT (${normalizeAudio})">
+      <configurations>
+        <configuration key="source-flavors">*/source</configuration>
+        <configuration key="target-flavor">*/reencoded</configuration>
+        <configuration key="encoding-profile">scale.fhd.framerate.fix</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Re-encode Opencast Studio Recording to fix framerate and resolution (normalize)"
+      if="${flagRewriteStudio} AND ${normalizeAudio}">
+      <configurations>
+        <configuration key="source-flavors">*/source</configuration>
+        <configuration key="target-flavor">*/reencoded</configuration>
+        <configuration key="encoding-profile">scale.fhd.framerate.fix-normalize</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presentation)"
+      if="NOT (${flagRewrite} OR ${flagRewriteStudio})">
+      <configurations>
+        <configuration key="source-flavors">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/reencoded</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presenter)"
+      if="NOT (${flagRewrite})">
+      <configurations>
+        <configuration key="source-flavors">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/reencoded</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="select-tracks"
+      exception-handler-workflow="partial-error"
+      description="Preparing audio and video work versions (audio muxing)">
+      <configurations>
+        <configuration key="source-flavor">*/reencoded</configuration>
+        <configuration key="target-flavor">*/unsychronized</configuration>
+        <configuration key="target-tags">-archive</configuration>
+      </configurations>
+    </operation>
+
+    <!--
+      Track synchronization
+      =====================
+    -->
+    <operation
+      id="analyze-tracks"
+      exception-handler-workflow="partial-error"
+      description="Analyze tracks in media package and set control variables"
+      if="${syncTracks}">
+      <configurations>
+        <configuration key="source-flavor">*/unsychronized</configuration>
+      </configurations>
+    </operation>
+    <operation
+        id="execute-once"
+        exception-handler-workflow="partial-error"
+        fail-on-error="true"
+        description="Synchonize presentation (slides)"
+        if="${syncTracks} AND ${presenter_unsychronized_audio} AND ${presentation_unsychronized_audio}">
+      <configurations>
+        <configuration key="exec">sync.py</configuration>
+        <configuration key="params">--in #{flavor(presentation/unsychronized)} --ref #{flavor(presenter/unsychronized)} --out #{out} --mode ${syncTracksOption} --offset ${syncTracks_presentation}</configuration>
+        <configuration key="load">4</configuration>
+        <configuration key="output-filename">out.mp4</configuration>
+        <configuration key="expected-type">Track</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+      </configurations>
+    </operation>
+    <operation
+        id="execute-once"
+        exception-handler-workflow="partial-error"
+        fail-on-error="false"
+        description="Synchonize presenter"
+        if="${syncTracks} AND ${presenter_unsychronized_audio} AND ${presentation_unsychronized_audio}">
+      <configurations>
+        <configuration key="exec">sync.py</configuration>
+        <configuration key="params">--in #{flavor(presenter/unsychronized)} --ref #{flavor(presentation/unsychronized)} --out #{out} --mode ${syncTracksOption} --offset ${syncTracks_presenter}</configuration>
+        <configuration key="load">4</configuration>
+        <configuration key="output-filename">out.mp4</configuration>
+        <configuration key="expected-type">Track</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presentation)"
+      if="NOT (${syncTracks} AND ${presenter_unsychronized_audio} AND ${presentation_unsychronized_audio})">
+      <configurations>
+        <configuration key="source-flavors">presentation/unsychronized</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="tag"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Tagging source material for processing without encoding (presenter)"
+      if="NOT (${syncTracks} AND ${presenter_unsychronized_audio} AND ${presentation_unsychronized_audio})">
+      <configurations>
+        <configuration key="source-flavors">presenter/unsychronized</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="target-tags">-archive</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="inspect"
+      exception-handler-workflow="partial-error"
+      description="Inspecting audio and video streams">
+      <configurations>
+        <configuration key="overwrite">false</configuration>
+        <configuration key="accept-no-media">false</configuration>
+        <configuration key="accurate-frame-count">${accurateFrameCount}</configuration>
+      </configurations>
+    </operation>
+    <!--
+      =====================
+    -->
+
+  </operations>
+
+</definition>

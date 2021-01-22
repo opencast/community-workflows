@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>asset-delete</id>
+  <title>Delete old old snapshots</title>
+  <description>A WF mainly for scripts that will delete old snapshots</description>
+  <tags></tags>
+  <operations>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Asset delete                                                      -->
+    <!--                                                                   -->
+    <!-- Remove old snapshots.                                             -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <operation
+        id="asset-delete"
+        fail-on-error="false"
+        description="Delete all but last snapshot from AssetManager">
+      <configurations>
+        <configuration key="keep-last-snapshot">true</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+</definition>

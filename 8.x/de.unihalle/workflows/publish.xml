@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>publish-llz</id>
+  <title>@LLZ: Publish</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+  <displayOrder>500</displayOrder>
+  <description/>
+  <configuration_panel>
+    <![CDATA[
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Processing options:</legend>
+          <ul>
+            <li>
+              <input id="flagQuality1080p" name="flagQuality1080p" type="checkbox" class="configField" value="true" />
+              <label for="flagQuality1080p">1080p resolution (FullHD)</label>
+            </li>
+            <li>
+              <input id="flagQuality2160p" name="flagQuality2160p" type="checkbox" class="configField" value="true" />
+              <label for="flagQuality2160p">2160p resolution (UltraHD)</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagRewrite" name="flagRewrite" type="checkbox" class="configField" value="true" />
+              <label for="flagRewrite">Fix file format issues with nCast/Extron uploads (slower, lower quality result)</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagRewriteStudio" name="flagRewriteStudio" type="checkbox" class="configField" value="true" />
+              <label for="flagRewriteStudio">Fix file format issues with Opencast Studio recording</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagSegmentation" name="flagSegmentation" type="checkbox" class="configField" value="true" checked="checked" />
+              <label for="flagSegmentation">Detect video segments</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="accurateFrameCount" name="accurateFrameCount" type="checkbox" class="configField" value="true" />
+              <label for="accurateFrameCount">Determine accurate frame count</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="pCoverImage" type="checkbox" name="pCoverImage" value="true" class="configField" />
+              <label for="pCoverImage">Create a player cover image with text</label>
+            </li>
+            <li>
+              <label for="pCoverTime">Take cover image at [s]:</label>
+              <input id="pCoverTime" type="number" step="0.001" name="pCoverTime" value="1.000" class="configField" placeholder="time in s" required />
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="syncTracks" name="syncTracks" type="checkbox" class="configField" value="true" />
+              <label for="syncTracks">Synchronize tracks using audio signal cross-correlation (applied after file format fix, impacts editor preview)</label>
+              <!-- Place to keep the sync track state -->
+              <input type="hidden" id="syncTracksOption" class="configField" value="pad" />
+              <ul id="syncTracksOptionList" style="display:none">
+                <li>
+                  <input id="syncTracks_pad" type="radio" name="syncTracks_option" value="pad" checked="checked" />
+                  <label for="syncTracks_pad">Pad: Prepend the video missing the beginning with its first frame repeated for Δt determined automatically</label>
+                </li>
+                <li>
+                  <input id="syncTracks_trunc" type="radio" name="syncTracks_option" value="trunc" />
+                  <label for="syncTracks_trunc">Truncate: Remove the beginning of the video containing the beginning for Δt determined automatically</label>
+                </li>
+                <li>
+                  <input id="syncTracks_manual" type="radio" name="syncTracks_option" value="manual" />
+                  <label for="syncTracks_manual">Supply values manually. Positive = Padding, Negative = Truncation. abs(value) &lt;= 0.5 is not processed.</label>
+                </li>
+                <ul id="syncTracksManualFlavour" style="display:none">
+                  <li>
+                    <label for="syncTracks_presenter">Presenter [s]:</label>
+                    <input id="syncTracks_presenter" type="number" step="0.01" name="syncTracks_presenter" value="0.00" class="configField" placeholder="time in s" required />
+                  </li>
+                  <li>
+                    <label for="syncTracks_presentation">Slides [s]:</label>
+                    <input id="syncTracks_presentation" type="number" step="0.01" name="syncTracks_presentation" value="0.00" class="configField" placeholder="time in s" required />
+                  </li>
+                </ul>
+              </ul>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <input id="normalizeAudio" name="normalizeAudio" type="checkbox" class="configField" value="true" />
+              <label for="normalizeAudio">Dynamic Audio Normalizer (applied in file format fix, impacts editor preview, <a href="https://ffmpeg.org/ffmpeg-all.html#dynaudnorm" title="FFmpeg documentation" target="_blank">info</a>)</label>
+            </li>
+            <li>
+              <input id="normalizeAudio_EBU_R128" name="normalizeAudio_EBU_R128" type="checkbox" class="configField" value="true" checked="checked" />
+              <label for="normalizeAudio_EBU_R128">EBU R128 loudness normalization (applied in final transcoding, <a href="https://ffmpeg.org/ffmpeg-all.html#loudnorm" title="FFmpeg documentation" target="_blank">info</a>)</label>
+            </li>
+          </ul>
+        </fieldset>
+        <fieldset>
+          <legend>Publish to:</legend>
+            <ul id="publicationConfigurationPanel" class="workflow-configuration-subpanel">
+              <li>
+                <input id="publishToSearch" name="publishToSearch" type="checkbox" checked="checked" class="configField" value="true" />
+                <label for="publishToSearch">Opencast Index</label>
+                <fieldset>
+                  <ul id="searchConfigurationPanel" class="workflow-configuration-subpanel">
+                    <li>
+                      <input id="publishToEngage" name="searchPublishType" type="radio" checked="checked" class="configField" value="true" />
+                      <label for="publishToEngage">Opencast Media Module</label>
+                    </li>
+                    <li>
+                      <input id="publishToAws" name="searchPublishType" type="radio" class="configField" value="true"/>
+                      <label for="publishToAws">AWS</label>
+                    </li>
+                  </ul>
+                </fieldset>
+              </li>
+              <li>
+                <input id="publishToApi" name="publishToApi" type="checkbox" checked="checked" class="configField" value="true" />
+                <label for="publishToApi">External Applications</label>
+              </li>
+              <li>
+                <input id="publishToOaiPmh" name="publishToOaiPmh" type="checkbox" class="configField" value="true" />
+                <label for="publishToOaiPmh">OAI-PMH Default Repository</label>
+              </li>
+              <li>
+                <input id="publishToYouTube" name="publishToYouTube" type="checkbox" class="configField" value="true" disabled="disabled" />
+                <label for="publishToYouTube">YouTube</label>
+              </li>
+            </ul>
+
+          <ul style="display:none">
+            <li>
+              <input id="allowDownload" name="allowDownload" type="checkbox" class="configField" value="true" />
+              <label for="allowDownload">Tag for feeds/ allow download</label>
+            </li>
+          </ul>
+
+
+        </fieldset>
+      </div>
+
+      <!-- Show or hide the hold and publication configuration panel -->
+      <script type="text/javascript">
+        // Remove the line below if you wish to publish to AWS S3
+        $('#publishToAws').prop('disabled', true);
+        // Remove the line above if you wish to publish to AWS S3
+
+        awsWasDisabled = $('#publishToAws').prop('disabled');
+        awsWasChecked = $('#publishToAws').prop('checked');
+        engageWasChecked = $('#publishToEngage').prop('checked');
+
+        $('input[name="publishToSearch"]').change(function(){
+            if ($(this).is(':checked')) {
+              $('#publishToAws').prop('checked', awsWasChecked);
+              $('#publishToEngage').prop('checked', engageWasChecked);
+              $('#publishToAws').prop('disabled', awsWasDisabled);
+              $('#publishToEngage').prop('disabled', false);
+            } else if (!$(this).is(':checked')) {
+              awsWasChecked = $('#publishToAws').prop('checked');
+              engageWasChecked = $('#publishToEngage').prop('checked');
+
+              $('#publishToAws').prop('disabled', true);
+              $('#publishToEngage').prop('disabled', true);
+              $('#publishToAws').prop('checked', false);
+              $('#publishToEngage').prop('checked', false);
+            }
+        });
+        $('input[name="syncTracks_option"]')
+            .val([$('#syncTracksOption').val()]);
+        $('input[name="syncTracks_option"]').change(function(e){
+            if (this.checked) {
+                $('#syncTracksOption').val(this.value);
+            }
+        });
+        $('#syncTracks').change(function() {
+            $('#syncTracksOptionList').toggle(this.checked);
+            if (this.checked) {
+                $('#flagRewrite').prop('checked', this.checked);
+            }
+        }).trigger('change');
+        $('#syncTracks_manual').on('input', function(){
+              $('#syncTracksManualFlavour').toggle(this.checked);
+        }).trigger('change');
+        $('#normalizeAudio').change(function() {
+            if (this.checked) {
+                $('#flagRewrite').prop('checked', this.checked);
+            }
+        }).trigger('change');
+        $('#flagRewrite').change(function() {
+            if (!this.checked) {
+                $('#syncTracks').prop('checked', false).trigger('change');
+                $('#normalizeAudio').prop('checked', false);
+            }
+        }).trigger('change');
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- Apply the default workflow configuration -->
+
+    <!--
+    The following operation allows you to import properties from
+    a Java properties file, which might have been created by the
+    upload-and-schedule workflow.
+    However, whatever you import here will override the choices
+    your users made in the configuration panel. That's why it is
+    commented.
+    -->
+    <!--
+    <operation
+      id="import-wf-properties"
+      fail-on-error="true"
+      exception-handler-workflow="partial-error"
+      description="Import workflow settings from Java properties file">
+      <configurations>
+        <configuration key="source-flavor">processing/defaults</configuration>
+        <configuration key="keys">publishToSearch</configuration>
+      </configurations>
+    </operation>
+    -->
+
+    <operation
+      id="defaults"
+      description="Applying default configuration values">
+      <configurations>
+        <configuration key="flagRewrite">false</configuration>
+        <configuration key="flagRewriteStudio">false</configuration>
+        <configuration key="flagForCutting">false</configuration>
+        <configuration key="flagForReview">true</configuration>
+        <configuration key="flagQuality1080p">false</configuration>
+        <configuration key="flagQuality2160p">false</configuration>
+        <configuration key="flagSegmentation">true</configuration>
+        <configuration key="accurateFrameCount">false</configuration>
+        <configuration key="pCoverImage">false</configuration>
+        <configuration key="pCoverTime">1</configuration>
+        <configuration key="publishToEngage">true</configuration>
+        <configuration key="publishToApi">true</configuration>
+        <configuration key="publishToOaiPmh">false</configuration>
+        <configuration key="publishToYouTube">false</configuration>
+        <configuration key="publishToAws">false</configuration>
+        <configuration key="allowDownload">false</configuration>
+        <configuration key="uploadedSearchPreview">false</configuration>
+        <configuration key="thumbnailType">0</configuration>
+        <configuration key="thumbnailPosition">1</configuration>
+        <configuration key="syncTracks">false</configuration>
+        <configuration key="syncTracksOption">pad</configuration>
+        <configuration key="syncTracks_presenter">0.00</configuration>
+        <configuration key="syncTracks_presentation">0.00</configuration>
+        <configuration key="normalizeAudio">false</configuration>
+        <configuration key="normalizeAudio_EBU_R128">true</configuration>
+      </configurations>
+    </operation>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Prepare asset                                                     -->
+    <!--                                                                   -->
+    <!-- Prepare the recording for asset management, including creation of -->
+    <!-- previews, audio waveforms and storing of the recording data in    -->
+    <!-- the asset area for further processing.                            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Prepare work versions of the source material for further processing -->
+
+    <operation
+      id="include"
+      description="Prepare the recording for further processing">
+      <configurations>
+        <configuration key="workflow-id">partial-work-llz</configuration>
+      </configurations>
+    </operation>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Publish                                                           -->
+    <!--                                                                   -->
+    <!-- Encode and publish the recording to the selected publication      -->
+    <!-- channels, unless review for cutting has been selected.            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Encode and publish -->
+
+    <operation
+      id="include"
+      description="Publish the recording">
+      <configurations>
+        <configuration key="workflow-id">partial-publish-llz</configuration>
+      </configurations>
+    </operation>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Archive                                                           -->
+    <!--                                                                   -->
+    <!-- Download from external ingest nodes, tag, inspect and and prepare -->
+    <!-- source recording and metadata catalogs.                           -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Archive the recording -->
+
+    <operation
+      id="snapshot"
+      description="Archive publishing information">
+      <configurations>
+        <configuration key="source-tags">archive</configuration>
+      </configurations>
+    </operation>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Cleanup                                                           -->
+    <!--                                                                   -->
+    <!-- Remove work artifacts.                                            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Clean the system from work artifacts -->
+
+    <operation
+      id="include"
+      description="Remove temporary processing artifacts">
+      <configurations>
+        <configuration key="workflow-id">partial-cleanup</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+
+  <state-mappings>
+    <state-mapping state="running">EVENTS.EVENTS.STATE_MAPPING.PUBLISHING</state-mapping>
+    <state-mapping state="failing">EVENTS.EVENTS.STATE_MAPPING.PUBLISHING</state-mapping>
+  </state-mappings>
+
+</definition>

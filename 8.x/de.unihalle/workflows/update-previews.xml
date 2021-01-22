@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definition xmlns="http://workflow.opencastproject.org">
+
+  <id>update-previews-llz</id>
+  <title>@LLZ: Create or update preview/editor video</title>
+  <tags>
+    <tag>archive</tag>
+  </tags>
+  <description/>
+  <displayOrder>5</displayOrder>
+  <configuration_panel>
+    <![CDATA[
+      <div id="workflow-configuration">
+        <fieldset>
+          <legend>Processing options:</legend>
+          <ul>
+            <li>
+              <input id="flagRewrite" name="flagRewrite" type="checkbox" class="configField" value="true" />
+              <label for="flagRewrite">Fix file format issues with nCast/Extron uploads (slower, lower quality result)</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="flagRewriteStudio" name="flagRewriteStudio" type="checkbox" class="configField" value="true" />
+              <label for="flagRewriteStudio">Fix file format issues with Opencast Studio recording</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="accurateFrameCount" name="accurateFrameCount" type="checkbox" class="configField" value="true" />
+              <label for="accurateFrameCount">Determine accurate frame count</label>
+            </li>
+          </ul>
+
+          <ul>
+            <li>
+              <input id="syncTracks" name="syncTracks" type="checkbox" class="configField" value="true" />
+              <label for="syncTracks">Synchronize tracks using audio signal cross-correlation (applied after file format fix, impacts editor preview)</label>
+              <!-- Place to keep the sync track state -->
+              <input type="hidden" id="syncTracksOption" class="configField" value="pad" />
+              <ul id="syncTracksOptionList" style="display:none">
+                <li>
+                  <input id="syncTracks_pad" type="radio" name="syncTracks_option" value="pad" checked="checked" />
+                  <label for="syncTracks_pad">Pad: Prepend the video missing the beginning with its first frame repeated for Δt determined automatically</label>
+                </li>
+                <li>
+                  <input id="syncTracks_trunc" type="radio" name="syncTracks_option" value="trunc" />
+                  <label for="syncTracks_trunc">Truncate: Remove the beginning of the video containing the beginning for Δt determined automatically</label>
+                </li>
+                <li>
+                  <input id="syncTracks_manual" type="radio" name="syncTracks_option" value="manual" />
+                  <label for="syncTracks_manual">Supply values manually. Positive = Padding, Negative = Truncation. abs(value) &lt;= 0.5 is not processed.</label>
+                </li>
+                <ul id="syncTracksManualFlavour" style="display:none">
+                  <li>
+                    <label for="syncTracks_presenter">Presenter [s]:</label>
+                    <input id="syncTracks_presenter" type="number" step="0.01" name="syncTracks_presenter" value="0.00" class="configField" placeholder="time in s" required />
+                  </li>
+                  <li>
+                    <label for="syncTracks_presentation">Slides [s]:</label>
+                    <input id="syncTracks_presentation" type="number" step="0.01" name="syncTracks_presentation" value="0.00" class="configField" placeholder="time in s" required />
+                  </li>
+                </ul>
+              </ul>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <input id="normalizeAudio" name="normalizeAudio" type="checkbox" class="configField" value="true" />
+              <label for="normalizeAudio">Dynamic Audio Normalizer (presupposes file format fix, <a href="https://ffmpeg.org/ffmpeg-all.html#dynaudnorm" title="FFMPEG documentation" target="_blank">info</a>)</label>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
+
+      <!-- Show or hide the hold and publication configuration panel -->
+      <script type="text/javascript">
+        $('input[name="syncTracks_option"]')
+            .val([$('#syncTracksOption').val()]);
+        $('input[name="syncTracks_option"]').change(function(e){
+            if (this.checked) {
+                $('#syncTracksOption').val(this.value);
+            }
+        });
+        $('#syncTracks').change(function() {
+            $('#syncTracksOptionList').toggle(this.checked);
+            if (this.checked) {
+                $('#flagRewrite').prop('checked', this.checked);
+            }
+        }).trigger('change');
+        $('#syncTracks_manual').on('input', function(){
+              $('#syncTracksManualFlavour').toggle(this.checked);
+        }).trigger('change');
+        $('#normalizeAudio').change(function() {
+            if (this.checked) {
+                $('#flagRewrite').prop('checked', this.checked);
+            }
+        }).trigger('change');
+        $('#flagRewrite').change(function() {
+            if (!this.checked) {
+                $('#syncTracks').prop('checked', false).trigger('change');
+                $('#normalizeAudio').prop('checked', false);
+            }
+        }).trigger('change');
+      </script>
+    ]]>
+  </configuration_panel>
+
+  <operations>
+
+
+      <!-- Apply the default workflow configuration -->
+
+      <operation
+        id="defaults"
+        description="Applying default configuration values">
+        <configurations>
+          <configuration key="flagRewrite">false</configuration>
+          <configuration key="flagRewriteStudio">false</configuration>
+          <configuration key="flagForCutting">false</configuration>
+          <configuration key="flagForReview">true</configuration>
+          <configuration key="accurateFrameCount">false</configuration>
+          <configuration key="thumbnailType">0</configuration>
+          <configuration key="thumbnailPosition">1</configuration>
+          <configuration key="syncTracks">false</configuration>
+          <configuration key="syncTracksOption">pad</configuration>
+          <configuration key="syncTracks_presenter">0.00</configuration>
+          <configuration key="syncTracks_presentation">0.00</configuration>
+          <configuration key="normalizeAudio">false</configuration>
+        </configurations>
+      </operation>
+
+      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+      <!-- Prepare asset                                                     -->
+      <!--                                                                   -->
+      <!-- Creat previews, audio waveforms and make those artifacts availabe -->
+      <!-- for use in the preview and cutting tool.                          -->
+      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+      <!-- Prepare work versions of the source material for further processing -->
+
+      <operation
+        id="include"
+        description="Prepare the recording for further processing">
+        <configurations>
+          <configuration key="workflow-id">partial-work-llz</configuration>
+        </configurations>
+      </operation>
+
+      <!-- Create preview artifacts -->
+
+      <operation
+        id="include"
+        description="Prepare preview versions of the recording">
+        <configurations>
+          <configuration key="workflow-id">partial-preview-llz</configuration>
+        </configurations>
+      </operation>
+
+      <!-- Archive with previews generated -->
+
+      <operation
+        id="snapshot"
+        description="Archive preview information">
+        <configurations>
+          <configuration key="source-tags">archive</configuration>
+        </configurations>
+      </operation>
+
+      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+      <!-- Cleanup                                                           -->
+      <!--                                                                   -->
+      <!-- Remove work artifacts.                                            -->
+      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+      <!-- Clean the system from work artifacts -->
+
+      <operation
+        id="include"
+        description="Remove temporary processing artifacts">
+        <configurations>
+          <configuration key="workflow-id">partial-cleanup</configuration>
+        </configurations>
+      </operation>
+
+  </operations>
+
+  <state-mappings>
+    <state-mapping state="running">EVENTS.EVENTS.STATE_MAPPING.UPDATING_PREVIEWS</state-mapping>
+    <state-mapping state="failing">EVENTS.EVENTS.STATE_MAPPING.UPDATING_PREVIEWS</state-mapping>
+  </state-mappings>
+
+</definition>
