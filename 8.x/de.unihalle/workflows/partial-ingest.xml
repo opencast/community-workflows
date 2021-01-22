@@ -37,6 +37,7 @@
       <configurations>
         <configuration key="overwrite">false</configuration>
         <configuration key="accept-no-media">false</configuration>
+        <configuration key="accurate-frame-count">${accurateFrameCount}</configuration>
       </configurations>
     </operation>
 

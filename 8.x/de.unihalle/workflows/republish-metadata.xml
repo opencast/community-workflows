@@ -7,7 +7,7 @@
     <tag>archive</tag>
   </tags>
   <description/>
-  <displayOrder>900</displayOrder>
+  <displayOrder>899</displayOrder>
   <configuration_panel>
     <![CDATA[
       <div id="workflow-configuration">
@@ -43,7 +43,7 @@
       description="Applying default configuration values">
       <configurations>
         <configuration key="publishToEngage">true</configuration>
-        <configuration key="publishToOaiPmh">true</configuration>
+        <configuration key="publishToOaiPmh">false</configuration>
         <configuration key="publishToYouTube">false</configuration>
       </configurations>
     </operation>
@@ -96,16 +96,19 @@
     </operation>
     -->
 
-    <!-- Clean up work artifacts -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Cleanup                                                           -->
+    <!--                                                                   -->
+    <!-- Remove work artifacts.                                            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Clean the system from work artifacts -->
 
     <operation
-        id="cleanup"
-        fail-on-error="false"
-        description="Remove temporary processing artifacts">
+      id="include"
+      description="Remove temporary processing artifacts">
       <configurations>
-        <configuration key="delete-external">true</configuration>
-        <!-- FixMe Don't clean up ACLs until workflow service no longer looks for them in the WFR. -->
-        <configuration key="preserve-flavors">security/*</configuration>
+        <configuration key="workflow-id">partial-cleanup</configuration>
       </configurations>
     </operation>
 

@@ -5,7 +5,6 @@
   <title>Cleanup and publish placeholder video</title>
     <tags>
       <tag>archive</tag>
-      <tag>editor</tag>
     </tags>
   <description>
     Publish a placeholder video for corrupt videos.
@@ -73,7 +72,7 @@
       exception-handler-workflow="partial-error"
       description="Tagging media package elements for deletion">
       <configurations>
-        <configuration key="source-flavors">*/source,*/prepared,*/player+preview</configuration>
+        <configuration key="source-flavors">*/source,*/player+preview</configuration>
         <configuration key="target-tags">-archive</configuration>
       </configurations>
     </operation>
@@ -198,15 +197,12 @@
       </configurations>
     </operation>
 
-    <!-- Clean up work artifacts -->
+    <!-- Clean the system from work artifacts -->
     <operation
-        id="cleanup"
-        fail-on-error="false"
-        description="Remove temporary processing artifacts">
+      id="include"
+      description="Remove temporary processing artifacts">
       <configurations>
-        <configuration key="delete-external">true</configuration>
-        <!-- FixMe Don't clean up ACLs until workflow service no longer looks for them in the WFR. -->
-        <configuration key="preserve-flavors">security/*</configuration>
+        <configuration key="workflow-id">partial-cleanup</configuration>
       </configurations>
     </operation>
 

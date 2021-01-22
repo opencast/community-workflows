@@ -6,9 +6,10 @@
   <operations>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <!-- Mark as failed                                                    -->
+    <!-- Notify                                                            -->
     <!--                                                                   -->
-    <!-- Mark recording as failed,                               -->
+    <!-- Add comments in order to mark the recording for review and send   -->
+    <!-- e-mails to administrators.                                        -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <!-- Mark the recording for review -->
@@ -34,8 +35,6 @@
         <configuration key="source-flavors">*/source,dublincore/*,security/*</configuration>
       </configurations>
     </operation>
-
-    <!-- Clean up the temporary files from the working file repository -->
 
     <operation
       id="cleanup"

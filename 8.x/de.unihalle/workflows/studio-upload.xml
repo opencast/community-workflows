@@ -6,9 +6,11 @@
   <tags>
     <tag>archive</tag>
     <tag>upload</tag>
+    <!-- fix for https://github.com/elan-ev/studip-opencast-plugin/issues/215 -->
+    <tag>schedule</tag>
   </tags>
   <description>
-    A simple and fast workflow for publishing videos created by Opencast Studio.
+    Workflow for publishing videos created by Opencast Studio.
   </description>
 
   <configuration_panel>
@@ -18,8 +20,18 @@
           <legend>Processing configuration:</legend>
           <ul>
             <li>
-              <input id="skipEditorPreview" name="skipEditorPreview" type="checkbox" checked="checked" class="configField" value="true" />
-              <label for="skipEditorPreview">Skip generating editor preview</label>
+              <input id="editorPreview" name="editorPreview" type="checkbox" class="configField" value="true" />
+              <label for="editorPreview">Generate editor preview</label>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <input id="normalizeAudio" name="normalizeAudio" type="checkbox" class="configField" value="true" />
+              <label for="normalizeAudio">Dynamic Audio Normalizer (applied in file format fix, impacts editor preview, <a href="https://ffmpeg.org/ffmpeg-all.html#dynaudnorm" title="FFMPEG documentation" target="_blank">info</a>)</label>
+            </li>
+            <li>
+              <input id="normalizeAudio_EBU_R128" name="normalizeAudio_EBU_R128" type="checkbox" class="configField" value="true" checked="checked" disabled />
+              <label for="normalizeAudio_EBU_R128">EBU R128 loudness normalization (applied in final transcoding, <a href="https://ffmpeg.org/ffmpeg-all.html#loudnorm" title="FFmpeg documentation" target="_blank">info</a>)</label>
             </li>
           </ul>
         </fieldset>
@@ -106,13 +118,15 @@
         id="defaults"
         description="Applying default configuration values">
       <configurations>
-        <configuration key="skipEditorPreview">true</configuration>
+        <configuration key="editorPreview">false</configuration>
         <configuration key="publishToEngage">true</configuration>
         <configuration key="publishToApi">true</configuration>
         <configuration key="publishToOaiPmh">false</configuration>
         <configuration key="publishToAws">false</configuration>
         <configuration key="thumbnailType">0</configuration>
         <configuration key="thumbnailPosition">1</configuration>
+        <configuration key="normalizeAudio">false</configuration>
+        <configuration key="normalizeAudio_EBU_R128">true</configuration>
       </configurations>
     </operation>
 
@@ -172,7 +186,7 @@
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/prepared</configuration>
-        <configuration key="target-tags">archive</configuration>
+        <configuration key="target-tags">-archive</configuration>
         <configuration key="rewrite">false</configuration>
         <configuration key="audio-muxing-source-flavors">*/?,*/*</configuration>
       </configurations>
@@ -185,49 +199,183 @@
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/prepared</configuration>
-        <configuration key="target-tags">archive</configuration>
+        <configuration key="target-tags">-archive</configuration>
         <configuration key="rewrite">false</configuration>
         <configuration key="audio-muxing-source-flavors">*/?,*/*</configuration>
       </configurations>
     </operation>
 
-    <!-- Create preview artifacts -->
-
     <operation
-        id="include"
-        if="NOT ${skipEditorPreview}"
-        description="Prepare preview versions of the recording">
+        id="analyze-tracks"
+        exception-handler-workflow="partial-error"
+        description="Analyze tracks in media package and set control variables">
       <configurations>
-        <configuration key="workflow-id">partial-preview</configuration>
+        <configuration key="source-flavor">*/prepared</configuration>
       </configurations>
     </operation>
 
-    <!-- Encode delivery version of the videos -->
+    <!-- Create preview artifacts -->
+    <operation
+        id="tag"
+        if="${editorPreview}"
+        description="Tag the recording for preview processing (presenter)">
+      <configurations>
+        <configuration key="source-flavors">presenter/prepared</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+    <operation
+        id="tag"
+        if="${editorPreview}"
+        description="Tag the recording for preview processing (presentation)">
+      <configurations>
+        <configuration key="source-flavors">presentation/prepared</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+        <configuration key="copy">true</configuration>
+      </configurations>
+    </operation>
+    <operation
+        id="include"
+        if="${editorPreview}"
+        description="Prepare preview versions of the recording">
+      <configurations>
+        <configuration key="workflow-id">partial-preview-llz</configuration>
+      </configurations>
+    </operation>
 
     <operation
         id="encode"
+        if="${presenter_prepared_video} AND (${presenter_prepared_resolution_x} &gt;= ${presenter_prepared_resolution_y})"
         exception-handler-workflow="partial-error"
-        description="Encoding videos to delivery formats">
+        description="Encoding videos (presenter, landscape) to delivery formats + EBU R128 loudness normalization">
+      <configurations>
+        <configuration key="source-flavor">presenter/prepared</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
+        <configuration key="target-tags">engage-download,engage-streaming,rss,atom</configuration>
+        <configuration key="encoding-profile">studio.adaptive-parallel.http</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="encode"
+        if="${presenter_prepared_video} AND NOT (${presenter_prepared_resolution_x} &gt;= ${presenter_prepared_resolution_y})"
+        exception-handler-workflow="partial-error"
+        description="Encoding videos (presenter, portrait) to delivery formats + EBU R128 loudness normalization">
+      <configurations>
+        <configuration key="source-flavor">presenter/prepared</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
+        <configuration key="target-tags">engage-download,engage-streaming,rss,atom</configuration>
+        <configuration key="encoding-profile">studio.adaptive-parallel-portrait.http</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="encode"
+        if="${presentation_prepared_video} AND (${presentation_prepared_resolution_x} &gt;= ${presentation_prepared_resolution_y})"
+        exception-handler-workflow="partial-error"
+        description="Encoding videos (presentation, landscape) to delivery formats + EBU R128 loudness normalization">
+      <configurations>
+        <configuration key="source-flavor">presentation/prepared</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
+        <configuration key="target-tags">engage-download,engage-streaming,rss,atom</configuration>
+        <configuration key="encoding-profile">studio.adaptive-parallel.http</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="encode"
+        if="${presentation_prepared_video} AND NOT (${presentation_prepared_resolution_x} &gt;= ${presentation_prepared_resolution_y})"
+        exception-handler-workflow="partial-error"
+        description="Encoding videos (presentation, portrait) to delivery formats + EBU R128 loudness normalization">
+      <configurations>
+        <configuration key="source-flavor">presentation/prepared</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
+        <configuration key="target-tags">engage-download,engage-streaming,rss,atom</configuration>
+        <configuration key="encoding-profile">studio.adaptive-parallel-portrait.http</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="encode"
+        if="${presenter_prepared_audio} OR ${presentation_prepared_audio}"
+        fail-on-error="false"
+        description="Transcode MP3, AAC and Ogg/Opus Audio + EBU R128 loudness normalization">
       <configurations>
         <configuration key="source-flavor">*/prepared</configuration>
         <configuration key="target-flavor">*/delivery</configuration>
-        <configuration key="target-tags">engage-download,engage-streaming</configuration>
-        <configuration key="encoding-profile">studio.adaptive-parallel.http</configuration>
+        <configuration key="target-tags">engage-download,rss,atom</configuration>
+        <configuration key="encoding-profile">parallel.http-audio-loudnorm</configuration>
       </configurations>
     </operation>
 
     <!-- Encode to engage search result thumbnails -->
 
     <operation
-        id="image"
-        exception-handler-workflow="partial-error"
-        description="Creating search result default thumbnails">
+      id="image"
+      if="NOT (${uploadedSearchPreview}) AND ${thumbnailType}==0 AND ${presenter_prepared_video}"
+      exception-handler-workflow="partial-error"
+      description="Creating search result default thumbnails">
       <configurations>
-        <configuration key="source-flavors">*/prepared</configuration>
+        <configuration key="source-flavor">presenter/prepared</configuration>
+        <configuration key="target-flavor">presenter/search+preview</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="encoding-profile">search-cover.http</configuration>
+        <configuration key="time">${thumbnailPosition}</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="image"
+      if="NOT (${uploadedSearchPreview}) AND ${thumbnailType}==0 AND (${presentation_prepared_video} AND NOT (${presenter_prepared_video}))"
+      exception-handler-workflow="partial-error"
+      description="Creating search result default thumbnails">
+      <configurations>
+        <configuration key="source-flavor">presentation/prepared</configuration>
+        <configuration key="target-flavor">presentation/search+preview</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="encoding-profile">search-cover.http</configuration>
+        <configuration key="time">${thumbnailPosition}</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="image"
+      if="NOT (${uploadedSearchPreview}) AND ${thumbnailType}==2"
+      exception-handler-workflow="partial-error"
+      description="Creating search result thumbnail from saved position">
+      <configurations>
+        <configuration key="source-flavor">${thumbnailTrack}/prepared</configuration>
         <configuration key="target-flavor">*/search+preview</configuration>
         <configuration key="target-tags">engage-download</configuration>
         <configuration key="encoding-profile">search-cover.http</configuration>
-        <configuration key="time">1</configuration>
+        <configuration key="time">${thumbnailPosition}</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="image-convert"
+      if="NOT (${uploadedSearchPreview}) AND ${thumbnailType}==1 AND ${presenter_prepared_video}"
+      exception-handler-workflow="partial-error"
+      description="Convert uploaded thumbnail to search result thumbnail (presenter track)">
+      <configurations>
+        <configuration key="source-flavors">thumbnail/source</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="target-flavor">presenter/search+preview</configuration>
+        <configuration key="encoding-profiles">search-cover.http.downscale</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="image-convert"
+      if="NOT (${uploadedSearchPreview}) AND ${thumbnailType}==1 AND ${presentation_prepared_video}"
+      exception-handler-workflow="partial-error"
+      description="Convert uploaded thumbnail to search result thumbnail (presentation track)">
+      <configurations>
+        <configuration key="source-flavors">thumbnail/source</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="target-flavor">presentation/search+preview</configuration>
+        <configuration key="encoding-profiles">search-cover.http.downscale</configuration>
       </configurations>
     </operation>
 
@@ -236,39 +384,13 @@
     <operation
         id="image"
         exception-handler-workflow="partial-error"
-        description="Creating presentation player preview image">
+        description="Creating player preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/prepared</configuration>
-        <configuration key="target-flavor">presentation/player+preview</configuration>
+        <configuration key="source-flavor">*/prepared</configuration>
+        <configuration key="target-flavor">*/player+preview</configuration>
         <configuration key="target-tags">engage-download</configuration>
         <configuration key="encoding-profile">player-preview.http</configuration>
         <configuration key="time">1</configuration>
-      </configurations>
-    </operation>
-
-    <operation
-        id="image"
-        exception-handler-workflow="partial-error"
-        description="Creating presenter cover image">
-      <configurations>
-        <configuration key="source-flavors">presenter/prepared</configuration>
-        <configuration key="target-flavor">presenter/coverbackground</configuration>
-        <configuration key="encoding-profile">player-preview.http</configuration>
-        <configuration key="time">1</configuration>
-      </configurations>
-    </operation>
-
-    <operation
-        id="cover-image"
-        exception-handler-workflow="partial-error"
-        description="Create presenter player preview image">
-      <configurations>
-        <configuration key="stylesheet">file://${karaf.etc}/branding/coverimage.xsl</configuration>
-        <configuration key="width">1280</configuration>
-        <configuration key="height">720</configuration>
-        <configuration key="posterimage-flavor">presenter/coverbackground</configuration>
-        <configuration key="target-flavor">presenter/player+preview</configuration>
-        <configuration key="target-tags">engage-download</configuration>
       </configurations>
     </operation>
 
@@ -279,7 +401,7 @@
         exception-handler-workflow="partial-error"
         description="Creating feed cover image">
       <configurations>
-        <configuration key="source-flavors">*/prepared</configuration>
+        <configuration key="source-flavor">*/prepared</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">*/feed+preview</configuration>
         <configuration key="target-tags">atom,rss</configuration>
@@ -288,20 +410,74 @@
       </configurations>
     </operation>
 
+    <!-- Create a cover image with the default template -->
+
+    <operation
+        id="tag"
+        description="Removing unneeded presenter-cover from download publication">
+      <configurations>
+        <configuration key="source-flavors">presenter/player+preview</configuration>
+        <configuration key="target-tags">-engage-download</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="image"
+        exception-handler-workflow="partial-error"
+        description="Player preview image">
+      <configurations>
+        <configuration key="source-flavor">presenter/prepared</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presenter/coverbackground</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+        id="cover-image"
+        exception-handler-workflow="partial-error"
+        description="Cover image">
+      <configurations>
+        <configuration key="stylesheet">file://${karaf.etc}/branding/coverimage.xsl</configuration>
+        <configuration key="width">1920</configuration>
+        <configuration key="height">1080</configuration>
+        <configuration key="posterimage-flavor">presenter/coverbackground</configuration>
+        <configuration key="target-flavor">presenter/player+preview</configuration>
+        <configuration key="target-tags">archive, engage-download</configuration>
+      </configurations>
+    </operation>
+
     <!-- Generate timeline preview images -->
 
     <operation
         id="timelinepreviews"
+        if="${presenter_prepared_video} AND NOT (${presentation_prepared_video})"
         fail-on-error="false"
         exception-handler-workflow="partial-error"
-        description="Creating timeline preview images">
+        description="Timeline preview images (presenter/camera)">
       <configurations>
-        <configuration key="source-flavor">*/prepared</configuration>
-        <configuration key="target-flavor">*/timeline+preview</configuration>
+        <configuration key="source-flavor">presenter/prepared</configuration>
+        <configuration key="target-flavor">presenter/timeline+preview</configuration>
         <configuration key="target-tags">engage-download</configuration>
-        <configuration key="image-count">100</configuration>
+        <configuration key="image-count">49</configuration>
       </configurations>
     </operation>
+
+    <operation
+        id="timelinepreviews"
+        if="${presentation_prepared_video}"
+        fail-on-error="false"
+        exception-handler-workflow="partial-error"
+        description="Timeline preview images (presentation/slides)">
+      <configurations>
+        <configuration key="source-flavor">presentation/prepared</configuration>
+        <configuration key="target-flavor">presentation/timeline+preview</configuration>
+        <configuration key="target-tags">engage-download</configuration>
+        <configuration key="image-count">49</configuration>
+      </configurations>
+    </operation>
+
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Segment video streams and extract metadata                        -->
@@ -397,7 +573,7 @@
         <configuration key="channel-id">api</configuration>
         <configuration key="mimetype">application/json</configuration>
         <configuration key="source-tags">engage-download,engage-streaming</configuration>
-        <configuration key="url-pattern">http://localhost:8080/api/events/${event_id}</configuration>
+        <configuration key="url-pattern">/api/events/${event_id}</configuration>
         <configuration key="with-published-elements">false</configuration>
         <configuration key="check-availability">true</configuration>
       </configurations>
@@ -439,12 +615,10 @@
     </operation>
 
     <operation
-        id="cleanup"
-        fail-on-error="false"
+        id="include"
         description="Remove temporary processing artifacts">
       <configurations>
-        <configuration key="preserve-flavors">security/*</configuration>
-        <configuration key="delete-external">true</configuration>
+        <configuration key="workflow-id">partial-cleanup</configuration>
       </configurations>
     </operation>
 

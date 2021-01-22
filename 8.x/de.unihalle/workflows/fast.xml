@@ -157,7 +157,7 @@
       id="timelinepreviews"
       if="${publish}"
       fail-on-error="false"
-      exception-handler-workflow="partial-error"
+      exception-handler-workflow="error"
       description="Creating timeline preview images">
       <configurations>
         <configuration key="source-flavor">*/preview</configuration>
@@ -232,8 +232,6 @@
       description="Cleaning up">
       <configurations>
         <configuration key="delete-external">true</configuration>
-        <!-- FixMe Don't clean up ACLs until workflow service no longer looks for them in the WFR. -->
-        <configuration key="preserve-flavors">security/*</configuration>
       </configurations>
     </operation>
 

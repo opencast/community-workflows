@@ -36,8 +36,6 @@
       description="Update recording in Opencast Media Module">
       <configurations>
         <configuration key="download-source-flavors">${download-source-flavors},dublincore/*,security/*</configuration>
-        <configuration key="download-source-tags">engage-download</configuration>
-        <configuration key="streaming-source-tags">engage-streaming</configuration>
         <configuration key="strategy">merge</configuration>
         <configuration key="check-availability">false</configuration>
       </configurations>
@@ -51,7 +49,7 @@
       exception-handler-workflow="partial-error"
       description="Update recording metadata in default OAI-PMH repository">
       <configurations>
-        <configuration key="source-flavors">${download-source-flavors}</configuration>
+        <configuration key="source-flavors">${download-source-flavors},dublincore/*,security/*</configuration>
         <configuration key="repository">default</configuration>
       </configurations>
     </operation>
@@ -66,16 +64,19 @@
       </configurations>
     </operation>
 
-    <!-- Clean up work artifacts -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- Cleanup                                                           -->
+    <!--                                                                   -->
+    <!-- Remove work artifacts.                                            -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <!-- Clean the system from work artifacts -->
 
     <operation
-        id="cleanup"
-        fail-on-error="false"
-        description="Remove temporary processing artifacts">
+      id="include"
+      description="Remove temporary processing artifacts">
       <configurations>
-        <configuration key="delete-external">true</configuration>
-        <!-- FixMe Don't clean up ACLs until workflow service no longer looks for them in the WFR. -->
-        <configuration key="preserve-flavors">security/*</configuration>
+        <configuration key="workflow-id">partial-cleanup</configuration>
       </configurations>
     </operation>
 

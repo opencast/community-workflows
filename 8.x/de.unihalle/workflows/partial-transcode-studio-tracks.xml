@@ -9,11 +9,24 @@
     <operation
       id="compose"
       exception-handler-workflow="partial-error"
-      description="Reencode presenter video to fix framerate and resolution">
+      description="Reencode presenter video to fix framerate and resolution"
+      if="NOT (${normalizeAudio})">
       <configurations>
         <configuration key="source-flavors">*/source</configuration>
         <configuration key="target-flavor">*/source+transcoded</configuration>
         <configuration key="encoding-profile">scale.fhd.framerate.fix</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="compose"
+      exception-handler-workflow="partial-error"
+      description="Reencode presenter video to fix framerate and resolution (+dynamic normalization)"
+      if="${normalizeAudio}">
+      <configurations>
+        <configuration key="source-flavors">*/source</configuration>
+        <configuration key="target-flavor">*/source+transcoded</configuration>
+        <configuration key="encoding-profile">scale.fhd.framerate.fix-normalize</configuration>
       </configurations>
     </operation>
 
